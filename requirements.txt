@@ -1,8 +1,9 @@
-# Streamlit Community Cloud (uv/pip). Keep this lean.
-# streamlit is preinstalled on Community Cloud — pin only if needed.
+# Streamlit Community Cloud installs from this file (pip/uv).
+# Keep lean. streamlit is preinstalled on Community Cloud.
 openai>=1.50,<2
 python-dotenv>=1.0
-minsearch>=0.0.12
+# Pin: newer minsearch majors may change the Index API used by app/search.py
+minsearch==0.0.12
 numpy>=1.26,<3
-# Psycopg 3 binary wheel (optional logging; Q&A works without Postgres)
+# Optional Postgres logging (fails soft if DB unreachable)
 psycopg-binary>=3.1

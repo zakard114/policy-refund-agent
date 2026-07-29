@@ -27,4 +27,6 @@ packages = ["app"]
 
 [tool.uv]
 package = true
-cache-dir = "../../../.cache/uv"
+# Do not set cache-dir here — Streamlit Community Cloud runs `uv sync` when
+# uv.lock is present, and a host-relative cache path breaks the cloud install.
+# Local: set UV_CACHE_DIR via scripts/use_e_drive.ps1 instead.
