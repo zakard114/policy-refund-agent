@@ -159,7 +159,7 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 | **Problem description** | 2 | [Problem](#problem) — Zakard Shop refund support; synthetic KB in [`data/refund_policy.md`](data/refund_policy.md) |
 | **Retrieval flow** | 2 | KB + LLM: [`app/hybrid.py`](app/hybrid.py) (keyword + vector **RRF**) → [`app/llm.py`](app/llm.py) `answer_question` with citations |
 | **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
-| **LLM evaluation** | 2 | [`app/judge.py`](app/judge.py) LLM-as-judge with stored outputs in [`data/eval_results.json`](data/eval_results.json). Full 26-case run completed via [`app/evaluate.py`](app/evaluate.py) — Fact Pass Rate **100 %** (20/20 answerable), LLM Judge mean **4.97/5.00** across 26 cases |
+| **LLM evaluation** | 2 | Compared **two system prompts** on the same retrieval context: **A** minimal grounded vs **B** production `SUPPORT_SYSTEM_PROMPT` (structured + safety). Judge means **A=4.73** / **B=5.00** (n=5) → **selected B**. Evidence: [`data/eval_llm_approaches.json`](data/eval_llm_approaches.json), script [`scripts/eval_llm_approaches.py`](scripts/eval_llm_approaches.py). Full 26-case judge also in [`data/eval_results.json`](data/eval_results.json) (Fact Pass **100 %**, mean **4.97/5.00**) |
 | **Interface** | 2 | Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` — [Screenshots](#screenshots) |
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
 | **Monitoring** | 2 | Postgres `conversation_logs` + Streamlit feedback + Grafana **7 panels** — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json), `:3002` — [Screenshots](#screenshots) |
@@ -180,6 +180,7 @@ cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
 uv run --no-sync python -m app.evaluate --retrieval-only   # retrieval metrics
 python scripts\demo_part_c_tools.py                          # agent tools (3 decisions)
 python scripts\demo_part_d_safety.py                         # unanswerable + injection (6 cases)
+python scripts\eval_llm_approaches.py                        # prompt A vs B (LLM eval)
 docker compose up -d postgres grafana streamlit              # full stack
 ```
 
