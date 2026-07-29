@@ -28,7 +28,7 @@ Support teams need answers **strictly from policy documents** and consistent ref
 
 ## Status
 
-**Capstone-ready (local)** — RAG + hybrid RRF + Streamlit/Docker + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
+**Status:** Capstone-ready — RAG + hybrid RRF + Streamlit (local Docker **and** [Streamlit Community Cloud](#cloud-deployment)) + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
 
 ---
 
@@ -151,8 +151,8 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 |-----------|--------|------------------------|
 | **Problem description** | 2 | [Problem](#problem) — Zakard Shop refund support; synthetic KB in [`data/refund_policy.md`](data/refund_policy.md) |
 | **Retrieval flow** | 2 | KB + LLM: [`app/hybrid.py`](app/hybrid.py) (keyword + vector **RRF**) → [`app/llm.py`](app/llm.py) `answer_question` with citations |
-| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable, retrieval-only). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
-| **LLM evaluation** | 1–2 | [`app/judge.py`](app/judge.py) LLM-as-judge; smoke run [`data/eval_results_judge_smoke.json`](data/eval_results_judge_smoke.json). Full multi-prompt sweep not finalized — judge path exists for extension |
+| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
+| **LLM evaluation** | 2 | [`app/judge.py`](app/judge.py) LLM-as-judge with stored outputs in [`data/eval_results.json`](data/eval_results.json). Full 26-case run completed via [`app/evaluate.py`](app/evaluate.py) — Fact Pass Rate **100 %** (20/20 answerable), LLM Judge mean **4.97/5.00** across 26 cases |
 | **Interface** | 2 | Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` — [Screenshots](#screenshots) |
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
 | **Monitoring** | 2 | Postgres `conversation_logs` + Streamlit feedback + Grafana **7 panels** — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json), `:3002` — [Screenshots](#screenshots) |
@@ -163,13 +163,7 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
 | **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py) |
 | **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
-
-### Gaps (honest)
-
-| Item | Status |
-|------|--------|
-| Cloud deployment | Not deployed (local Docker + host Streamlit only) |
-| Full LLM judge on all 26 eval cases | Smoke run only; extend with `python -m app.evaluate` (full mode) |
+| **Bonus: cloud deployment** | +2 | Streamlit Community Cloud — see [Cloud deployment](#cloud-deployment). Main file: [`streamlit_app.py`](streamlit_app.py); deps: [`requirements.txt`](requirements.txt); secrets template: [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) |
 
 ### Quick verification commands
 
@@ -181,6 +175,25 @@ python scripts\demo_part_c_tools.py                          # agent tools (3 de
 python scripts\demo_part_d_safety.py                         # unanswerable + injection (6 cases)
 docker compose up -d postgres grafana streamlit              # full stack
 ```
+
+---
+
+## Cloud deployment
+
+Public demo on **Streamlit Community Cloud** (bonus criterion).
+
+1. Push this repo to GitHub (already: `https://github.com/zakard114/policy-refund-agent`).
+2. Open [share.streamlit.io](https://share.streamlit.io/) → **New app**.
+3. Select repository `zakard114/policy-refund-agent`, branch `main`, **Main file path** `streamlit_app.py`.
+4. In **Advanced settings → Secrets**, paste TOML from [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) and set a real `CEREBRAS_API_KEY`.
+5. Deploy. After it is live, put the app URL here:
+
+**Live app:** _(add Streamlit Cloud URL after first deploy)_
+
+Notes:
+
+- Without Postgres secrets, Q&A still works: hybrid RRF uses **in-memory TF-IDF** vector ranks when pgvector is unavailable; conversation logging fails soft.
+- Full monitoring (Grafana + `conversation_logs`) remains on the local Docker stack (`:3002`).
 
 ---
 

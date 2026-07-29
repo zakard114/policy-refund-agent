@@ -17,7 +17,11 @@ _ENV_LOADED = False
 
 
 def load_app_env() -> None:
-    """Load `.env` then optional shared LLM env (without overriding local values)."""
+    """Load `.env` then optional shared LLM env (without overriding local values).
+
+    On Streamlit Community Cloud, secrets are copied into ``os.environ`` first
+    by ``streamlit_app._apply_streamlit_secrets`` (dotenv must not wipe them).
+    """
     global _ENV_LOADED
     if _ENV_LOADED:
         return
