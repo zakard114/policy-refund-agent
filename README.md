@@ -141,6 +141,13 @@ Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -
 
 ![Streamlit Compose — refund + feedback](docs/images/compose/streamlit-compose-refund.png)
 
+### Cloud deployment (Streamlit Community Cloud)
+
+Live public app — https://policy-refund-agent.streamlit.app/  
+Agent tools on; demo order `ZK-1001` → **eligible**; Cloud manage-app log visible.
+
+![Streamlit Cloud — ZK-1001 eligible](docs/images/cloud/streamlit-cloud-zk1001.png)
+
 ---
 
 ## Evaluation criteria
@@ -157,13 +164,13 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
 | **Monitoring** | 2 | Postgres `conversation_logs` + Streamlit feedback + Grafana **7 panels** — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json), `:3002` — [Screenshots](#screenshots) |
 | **Containerization** | 2 | `docker compose up -d postgres grafana streamlit` — [`Dockerfile`](Dockerfile), [`docker-compose.yaml`](docker-compose.yaml) |
-| **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `uv.lock` / `pyproject.toml` (Python ≥ 3.12), policy + eval data in `data/` |
+| **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `requirements.txt` / `pyproject.toml` (Python ≥ 3.12), policy + eval data in `data/` |
 | **Best practice: hybrid search** | +1 | Default `PRA_RETRIEVAL_METHOD=hybrid` — [`app/hybrid.py`](app/hybrid.py) |
 | **Best practice: re-ranking** | +1 | **RRF** fusion of keyword + vector ranked lists (same module) |
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
 | **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py) |
 | **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
-| **Bonus: cloud deployment** | +2 | Streamlit Community Cloud — see [Cloud deployment](#cloud-deployment). Main file: [`streamlit_app.py`](streamlit_app.py); deps: [`requirements.txt`](requirements.txt); secrets template: [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) |
+| **Bonus: cloud deployment** | +2 | Live app https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment), screenshot [`docs/images/cloud/streamlit-cloud-zk1001.png`](docs/images/cloud/streamlit-cloud-zk1001.png) |
 
 ### Quick verification commands
 
@@ -189,6 +196,8 @@ Public demo on **Streamlit Community Cloud** (bonus criterion).
 5. Deploy. After it is live, put the app URL here:
 
 **Live app:** https://policy-refund-agent.streamlit.app/
+
+![Streamlit Cloud — ZK-1001 eligible](docs/images/cloud/streamlit-cloud-zk1001.png)
 
 Notes:
 
