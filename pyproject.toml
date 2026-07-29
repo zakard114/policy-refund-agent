@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "policy-refund-agent"
+version = "0.1.0"
+description = "Policy & Refund Support Agent — grounded RAG for e-commerce refund policy Q&A"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=1.50",
+    "python-dotenv>=1.0",
+    "minsearch>=0.0.12",
+    "streamlit>=1.32",
+    "psycopg[binary]>=3.1",
+]
+
+[project.scripts]
+pra-check-llm = "app.check_llm:main"
+pra-ask = "app.main:main"
+pra-streamlit = "app.entrypoints:streamlit_main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.uv]
+package = true
+cache-dir = "../../../.cache/uv"

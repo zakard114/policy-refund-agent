@@ -1,0 +1,154 @@
+# All bind mounts on E: — see AGENTS.md
+# Ports chosen to avoid clash with dtc-podcast-rag (5434, 3001) and ZoomCamp stacks:
+#   postgres 5435, grafana 3002, kestra UI 8085
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: pra-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-policy_refund_agent}
+      POSTGRES_USER: ${POSTGRES_USER:-pra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pra}
+    ports:
+      - "${POSTGRES_PORT:-5435}:5432"
+    volumes:
+      # Named volume avoids Windows bind-mount chown hang that blocks Postgres init.
+      # Data lives in Docker's VM; for E:-only strict mode see AGENTS.md note.
+      - pra_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Do not require DB name during first init (CREATE DATABASE races healthcheck).
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pra}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+
+  grafana:
+    # Pin 10.4.x — Grafana 13 + Docker Desktop SQLite often sticks on migrations / SQLITE_BUSY.
+    image: grafana/grafana:10.4.19
+    container_name: pra-grafana
+    ports:
+      # 3000 is used by another stack on this machine; PRA UI is :3002
+      - "3002:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - pra_grafana_data:/var/lib/grafana
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent/grafana/provisioning:/etc/grafana/provisioning
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent/grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_DEFAULT_THEME: dark
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_UNIFIED_ALERTING_ENABLED: "false"
+      GF_ALERTING_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_CHECK_FOR_UPDATES: "false"
+      GF_PATHS_DATA: /var/lib/grafana
+      # Avoid Docker Desktop SQLite slowness / SQLITE_BUSY — use host llm02 Postgres.
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: host.docker.internal:5433
+      GF_DATABASE_NAME: grafana
+      GF_DATABASE_USER: user
+      GF_DATABASE_PASSWORD: pswd
+      GF_DATABASE_SSL_MODE: disable
+    restart: unless-stopped
+
+  # --- Streamlit app (Module 5-4b) ------------------------------------------
+  # Host port 8502. Talks to compose DNS name `postgres` (not localhost).
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pra-streamlit
+    ports:
+      - "8502:8502"
+    # Project .env has Postgres + PRA_LLM_BACKEND; shared ZoomCamp file has
+    # CEREBRAS_* (host Streamlit loads it via app/env_paths — Docker cannot).
+    env_file:
+      - .env
+      - E:/IT_SPACES/AI/ZoomCamp/LLM/.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-policy_refund_agent}
+      POSTGRES_USER: ${POSTGRES_USER:-pra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pra}
+      PRA_PROJECT_ROOT: /app
+      # Prefer Cerebras even if shared .env also defines OPENAI_* / Ollama.
+      PRA_LLM_BACKEND: ${PRA_LLM_BACKEND:-cerebras}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # --- Kestra orchestration (Module 3 / K-1) ---------------------------------
+  # Metadata DB is separate from app postgres so app data and Kestra internals
+  # never mix. Credentials mirror the ZoomCamp LLM/03 setup.
+  kestra-postgres:
+    image: postgres:17
+    container_name: pra-kestra-postgres
+    environment:
+      POSTGRES_DB: kestra
+      POSTGRES_USER: kestra
+      POSTGRES_PASSWORD: k3str4
+    volumes:
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent/docker/kestra_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d kestra -U kestra"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  kestra:
+    image: kestra/kestra:v1.3.21
+    container_name: pra-kestra
+    user: "root"
+    command: server standalone
+    ports:
+      - "8085:8080"
+    volumes:
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent/docker/kestra_data:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent/docker/kestra_tmp:/tmp/kestra-wd
+      # Host project for Process-runner flows (K-2 ingest)
+      - E:/IT_SPACES/AI/Projects/llm/policy-refund-agent:/workspace/pra
+    environment:
+      KESTRA_CONFIGURATION: |
+        datasources:
+          postgres:
+            url: jdbc:postgresql://kestra-postgres:5432/kestra
+            driverClassName: org.postgresql.Driver
+            username: kestra
+            password: k3str4
+        kestra:
+          server:
+            basicAuth:
+              username: "admin@kestra.io"
+              password: Admin1234!
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              basePath: "/app/storage"
+          queue:
+            type: postgres
+          tasks:
+            tmpDir:
+              path: /tmp/kestra-wd/tmp
+          url: http://localhost:8085/
+    depends_on:
+      kestra-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pra_pgdata:
+    name: pra_pgdata
+  pra_grafana_data:
+    name: pra_grafana_data

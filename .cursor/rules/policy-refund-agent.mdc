@@ -1,0 +1,14 @@
+---
+description: Policy & Refund Support Agent — LLM candidate project
+alwaysApply: true
+---
+
+# policy-refund-agent
+
+LLM Zoomcamp / job-portfolio **candidate** — not a submitted attempt.
+
+- No course FAQ; no `dtc` naming; no bulk paste from sibling `dtc-podcast-rag`.
+- Stack: hybrid RAG, agent tools, Kestra ingest, eval harness, Streamlit, Postgres, Grafana.
+- Read `_planning/ROADMAP.md` for current phase only.
+- Tutor pastes: **validate only** unless asked to apply/fix. Cursor writes `PHASE_LOG.md`.
+- Need Gemini (next Part lesson / teaching packet)? **Report to zakard** → ask them to instruct Gemini. Do not invent the curriculum.

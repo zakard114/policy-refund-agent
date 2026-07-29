@@ -1,0 +1,44 @@
+# K-2: orchestrate policy ingest → minsearch index rebuild.
+# Runs inside the Kestra container (Process runner) against the host project
+# mounted at /workspace/pra — avoids Docker-taskRunner bind issues on Windows.
+#
+# Intentionally NOT ZoomCamp IngestDocument+KestraKVStore (separate RAG store).
+id: ingest_policy
+namespace: pra
+
+description: |
+  Rebuild the Policy & Refund Agent search index from data/refund_policy.md.
+  - Manual: Run from Kestra UI anytime
+  - Schedule: daily at 00:00 — enable in UI when ready (disabled by default)
+
+triggers:
+  - id: daily_midnight
+    type: io.kestra.plugin.core.trigger.Schedule
+    cron: "0 0 * * *"
+    disabled: true
+
+tasks:
+  - id: rebuild_index
+    type: io.kestra.plugin.scripts.shell.Commands
+    description: Force-rebuild minsearch index and write data/index_manifest.json
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - python3 -m pip install -q minsearch python-dotenv
+      - ls -la /workspace/pra/app
+      - cd /workspace/pra && PYTHONPATH=/workspace/pra python3 -m app.rebuild_index
+
+  - id: verify_manifest
+    type: io.kestra.plugin.scripts.shell.Commands
+    description: Assert manifest status=ok and section_count > 0
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - cd /workspace/pra && python3 -c "import json; m=json.load(open('data/index_manifest.json')); assert m.get('status')=='ok' and m.get('section_count',0)>0, m; print('verify_ok sections=', m['section_count']); print('sha=', m['policy_sha256'][:12])"
+
+  - id: log_success
+    type: io.kestra.plugin.core.log.Log
+    message: |
+      Policy index rebuild SUCCESS.
+      Manifest: data/index_manifest.json
+      Flow: pra.ingest_policy

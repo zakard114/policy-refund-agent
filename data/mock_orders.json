@@ -1,0 +1,60 @@
+{
+  "description": "Mock Zakard Shop orders for Part 6-1 agent tools (not real customers).",
+  "orders": [
+    {
+      "order_id": "ZK-1001",
+      "product": "Cotton hoodie (M)",
+      "category": "apparel",
+      "days_since_delivery": 3,
+      "condition": "unopened",
+      "label_intact": true,
+      "powered_on": false,
+      "defect_reported": false,
+      "scenario": "eligible"
+    },
+    {
+      "order_id": "ZK-1002",
+      "product": "Running shoes",
+      "category": "apparel",
+      "days_since_delivery": 14,
+      "condition": "good",
+      "label_intact": true,
+      "powered_on": false,
+      "defect_reported": false,
+      "scenario": "ineligible_window"
+    },
+    {
+      "order_id": "ZK-1003",
+      "product": "Desk lamp",
+      "category": "home",
+      "days_since_delivery": null,
+      "condition": "unknown",
+      "label_intact": null,
+      "powered_on": false,
+      "defect_reported": false,
+      "scenario": "need_more_info"
+    },
+    {
+      "order_id": "ZK-1004",
+      "product": "Ceramic mug set",
+      "category": "home",
+      "days_since_delivery": 2,
+      "condition": "damaged_by_customer",
+      "label_intact": true,
+      "powered_on": false,
+      "defect_reported": false,
+      "scenario": "ineligible_damage"
+    },
+    {
+      "order_id": "ZK-1005",
+      "product": "Bluetooth earbuds",
+      "category": "electronics",
+      "days_since_delivery": 1,
+      "condition": "good",
+      "label_intact": true,
+      "powered_on": true,
+      "defect_reported": false,
+      "scenario": "ineligible_electronics"
+    }
+  ]
+}
