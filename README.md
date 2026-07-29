@@ -14,7 +14,7 @@ Support teams need answers **strictly from policy documents** and consistent ref
 2. Supports multilingual questions (translate-to-English for search, answer in the user's language)
 3. Returns safe fallbacks when context is insufficient or prompt injection is detected
 4. Evaluates refund eligibility with mock order tools (`lookup_order` / `evaluate_refund`)
-5. Measures quality offline (Hit Rate, MRR, LLM-as-judge)
+5. Measures quality offline (Hit Rate, MRR, LLM-as-judge), including multilingual questions (Korean / Spanish / French) with English glosses in [`data/eval_data.json`](data/eval_data.json)
 
 ### Knowledge base
 
@@ -188,7 +188,7 @@ Public demo on **Streamlit Community Cloud** (bonus criterion).
 4. In **Advanced settings → Secrets**, paste TOML from [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) and set a real `CEREBRAS_API_KEY`.
 5. Deploy. After it is live, put the app URL here:
 
-**Live app:** _(add Streamlit Cloud URL after first deploy)_
+**Live app:** https://policy-refund-agent.streamlit.app/
 
 Notes:
 
