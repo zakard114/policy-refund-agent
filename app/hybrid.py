@@ -77,6 +77,29 @@ def rebuild_vector_index() -> int:
     return len(idx.docs)
 
 
+def _local_vector_ids(query: str, idx: _VectorIndex, top_k: int) -> list[str]:
+    """Cosine rank over the in-memory TF-IDF matrix (no Postgres required)."""
+    qvec = embed_query(query, idx.vocab, idx.idf)
+    if qvec.size == 0 or idx.matrix.size == 0:
+        return []
+    sims = idx.matrix @ qvec
+    order = np.argsort(-sims)[:top_k]
+    return [str(idx.docs[i]["id"]) for i in order]
+
+
+def _pgvector_ids(query: str, idx: _VectorIndex, top_k: int) -> list[str] | None:
+    """Return ranked ids from pgvector, or None if DB/pgvector is unavailable."""
+    try:
+        qvec = embed_query(query, idx.vocab, idx.idf)
+        with pgvector_store.connect() as conn:
+            pgvector_store.ensure_indexed(conn, idx.docs, idx.matrix)
+            vec_rows = pgvector_store.search_sql(conn, qvec, top_k=top_k)
+        return [chunk_id for chunk_id, _section, _sim in vec_rows]
+    except Exception as exc:  # noqa: BLE001 — cloud / no-DB environments
+        logger.info("pgvector unavailable (%s); using local TF-IDF vector ranks", exc)
+        return None
+
+
 def hybrid_search(
     query: str,
     num_results: int = 3,
@@ -89,6 +112,9 @@ def hybrid_search(
 
     keyword ranks ∥ vector ranks → RRF → top ``num_results`` full policy docs
     (same shape as ``app.search.search`` hits).
+
+    Prefers pgvector when available; otherwise uses in-memory TF-IDF ranks
+    (Streamlit Cloud / no Postgres).
     """
     idx = _build_local_index()
     pool = candidate_n or max(num_results * 2, len(idx.docs))
@@ -96,11 +122,9 @@ def hybrid_search(
     kw_hits = keyword_search(query, num_results=pool)
     kw_ids = [str(h.get("id") or "") for h in kw_hits if h.get("id")]
 
-    qvec = embed_query(query, idx.vocab, idx.idf)
-    with pgvector_store.connect() as conn:
-        pgvector_store.ensure_indexed(conn, idx.docs, idx.matrix)
-        vec_rows = pgvector_store.search_sql(conn, qvec, top_k=pool)
-    vec_ids = [chunk_id for chunk_id, _section, _sim in vec_rows]
+    vec_ids = _pgvector_ids(query, idx, pool)
+    if vec_ids is None:
+        vec_ids = _local_vector_ids(query, idx, pool)
 
     fused = rrf_fuse([kw_ids, vec_ids], k=rrf_k)
     out: list[dict] = []
@@ -134,22 +158,28 @@ def retrieve(
     try:
         if method == "vector":
             idx = _build_local_index()
-            qvec = embed_query(query, idx.vocab, idx.idf)
-            with pgvector_store.connect() as conn:
-                pgvector_store.ensure_indexed(conn, idx.docs, idx.matrix)
-                rows = pgvector_store.search_sql(conn, qvec, top_k=num_results)
+            vec_ids = _pgvector_ids(query, idx, num_results)
+            if vec_ids is None:
+                vec_ids = _local_vector_ids(query, idx, num_results)
+                used = "vector-local"
+            else:
+                used = "vector"
             hits = []
-            for chunk_id, _section, sim in rows:
+            qvec = embed_query(query, idx.vocab, idx.idf)
+            sims = idx.matrix @ qvec if qvec.size and idx.matrix.size else None
+            id_to_row = {str(d["id"]): i for i, d in enumerate(idx.docs)}
+            for chunk_id in vec_ids:
                 doc = idx.docs_by_id.get(chunk_id)
                 if doc is None:
                     continue
                 hit = dict(doc)
-                hit["cosine_sim"] = sim
+                if sims is not None and chunk_id in id_to_row:
+                    hit["cosine_sim"] = float(sims[id_to_row[chunk_id]])
                 hits.append(hit)
-            return hits, "vector"
+            return hits, used
 
-        # default: hybrid
+        # default: hybrid (pgvector or local TF-IDF + keyword RRF)
         return hybrid_search(query, num_results=num_results), "hybrid"
-    except Exception as exc:  # noqa: BLE001 — keep Q&A up if pgvector/DB is down
+    except Exception as exc:  # noqa: BLE001 — keep Q&A up if retrieval path fails
         logger.warning("Retrieval method=%s failed (%s); falling back to keyword", method, exc)
         return keyword_search(query, num_results=num_results), "keyword"
