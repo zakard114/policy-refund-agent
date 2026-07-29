@@ -10,10 +10,11 @@ This project answers questions and evaluates refund eligibility **from the Zakar
 
 Support teams need answers **strictly from policy documents** and consistent refund decisions. This app:
 
-1. Retrieves policy clauses (keyword search + citations)
+1. Retrieves policy clauses via hybrid search (keyword + vector RRF) with citations
 2. Supports multilingual questions (translate-to-English for search, answer in the user's language)
-3. Returns safe fallbacks when context is insufficient
-4. Measures quality offline (Hit Rate, Top-1, Fact Pass Rate)
+3. Returns safe fallbacks when context is insufficient or prompt injection is detected
+4. Evaluates refund eligibility with mock order tools (`lookup_order` / `evaluate_refund`)
+5. Measures quality offline (Hit Rate, MRR, LLM-as-judge)
 
 ### Knowledge base
 
@@ -27,7 +28,7 @@ Support teams need answers **strictly from policy documents** and consistent ref
 
 ## Status
 
-**Capstone-ready (local)** — RAG + hybrid RRF + Streamlit/Docker + agent tools + safety guards + monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
+**Capstone-ready (local)** — RAG + hybrid RRF + Streamlit/Docker + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
 
 ---
 
@@ -35,12 +36,12 @@ Support teams need answers **strictly from policy documents** and consistent ref
 
 | Role | Provider | Variables |
 |------|----------|-----------|
-| App LLM | **Gemma on Cerebras** (OpenAI-compatible) | `PRA_LLM_BACKEND=cerebras`, `CEREBRAS_*` in `.env` or shared workspace LLM env |
+| App LLM | **Gemma on Cerebras** (OpenAI-compatible) | `PRA_LLM_BACKEND=cerebras`, `CEREBRAS_*` in `.env` |
 
 ```powershell
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
 . .\scripts\use_e_drive.ps1
-copy .env.example .env
+copy .env.example .env        # set CEREBRAS_API_KEY inside
 uv sync
 uv run pra-check-llm
 ```
@@ -50,7 +51,7 @@ uv run pra-check-llm
 ## Prerequisites
 
 - Python 3.12+, [uv](https://docs.astral.sh/uv/)
-- [Docker Desktop](https://www.docker.com/) (disk location on **E:**)
+- [Docker Desktop](https://www.docker.com/)
 - LLM API key (Cerebras / OpenAI-compatible)
 
 ---
@@ -74,9 +75,9 @@ Optional orchestration UI: `docker compose up -d kestra-postgres kestra` → htt
 | Service | Port | Notes |
 |---------|------|--------|
 | `pra-postgres` | **5435** | App metrics DB (`conversation_logs`) |
-| `pra-grafana` | **3002** | Monitoring — not `:3000` / `:3001` (other stacks) |
+| `pra-grafana` | **3002** | Monitoring dashboard |
 | `pra-streamlit` | **8502** | Chat UI (`Dockerfile`) |
-| `pra-kestra` | **8085** | Optional ingest flows |
+| `pra-kestra` | **8085** | Optional ingestion flows |
 
 ### Dev alternative (host Python)
 
@@ -90,19 +91,21 @@ uv run --no-sync pra-streamlit
 uv run --no-sync python -m app.evaluate --retrieval-only
 ```
 
-If `pra-streamlit` is missing after a fresh clone (and you prefer not to full-sync): `uv pip install -e . --no-deps`.
+If `pra-streamlit` is missing after a fresh clone: `uv pip install -e . --no-deps`.
 
-**Agent tools (Part 6-1):** Streamlit sidebar toggle *Agent tools* (default on). Demo orders `ZK-1001` (eligible), `ZK-1002` (ineligible), `ZK-1003` (need_more_info).
+### Agent tools
+
+Streamlit sidebar toggle **Agent tools** (default on).
+Demo orders: `ZK-1001` (eligible), `ZK-1002` (ineligible), `ZK-1003` (need_more_info).
 
 ```powershell
-$env:PYTHONPATH = "E:\IT_SPACES\AI\Projects\llm\policy-refund-agent"
 python scripts\demo_part_c_tools.py
 python scripts\demo_part_c_tools.py --with-llm
 ```
 
 Compose Streamlit image must be rebuilt after code changes: `docker compose up -d --build streamlit`.
 
-All data and Docker volumes use **E:** paths — see [`AGENTS.md`](AGENTS.md). Grafana troubleshooting: [`docs/DOCKER_TROUBLESHOOT.md`](docs/DOCKER_TROUBLESHOOT.md).
+All data and Docker volumes use **E:** paths — see [`AGENTS.md`](AGENTS.md).
 
 ---
 
@@ -110,18 +113,18 @@ All data and Docker volumes use **E:** paths — see [`AGENTS.md`](AGENTS.md). G
 
 ### Hybrid retrieval
 
-Hybrid RAG chat (keyword + vector **RRF**) — http://localhost:8502  
+Hybrid RAG chat (keyword + vector **RRF**) — http://localhost:8502
 Caption shows `retrieval: hybrid` and per-section RRF scores.
 
 ![Streamlit hybrid chat](docs/images/hybrid/hybrid_ui.png)
 
 ### Monitoring (Postgres → Grafana + feedback)
 
-Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).  
+Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).
 Grafana: http://localhost:3002 · Streamlit: http://localhost:8502
 
-| Step | Shot |
-|------|------|
+| Step | Description |
+|------|-------------|
 | **1 · Before** | Cold start — Questions `0`, panels empty |
 | **2 · UI** | Ask + citations + **Feedback recorded: helpful 👍** |
 | **3 · After** | Latency / citations / **Thumbs up** populated |
@@ -138,9 +141,6 @@ Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -
 
 ![Streamlit Compose — refund + feedback](docs/images/compose/streamlit-compose-refund.png)
 
-Stable aliases (hybrid era): `docs/images/streamlit-chat.png`, `docs/images/grafana-monitoring.png`.  
-Index / archive: [`docs/images/README.md`](docs/images/README.md).
-
 ---
 
 ## Evaluation criteria
@@ -151,26 +151,25 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 |-----------|--------|------------------------|
 | **Problem description** | 2 | [Problem](#problem) — Zakard Shop refund support; synthetic KB in [`data/refund_policy.md`](data/refund_policy.md) |
 | **Retrieval flow** | 2 | KB + LLM: [`app/hybrid.py`](app/hybrid.py) (keyword + vector **RRF**) → [`app/llm.py`](app/llm.py) `answer_question` with citations |
-| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100%**, MRR **1.0** (20 answerable, retrieval-only). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
-| **LLM evaluation** | 1–2 | [`app/judge.py`](app/judge.py) LLM-as-judge; smoke [`data/eval_results_judge_smoke.json`](data/eval_results_judge_smoke.json). Full multi-prompt sweep not finalized — judge path exists for extension |
+| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable, retrieval-only). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
+| **LLM evaluation** | 1–2 | [`app/judge.py`](app/judge.py) LLM-as-judge; smoke run [`data/eval_results_judge_smoke.json`](data/eval_results_judge_smoke.json). Full multi-prompt sweep not finalized — judge path exists for extension |
 | **Interface** | 2 | Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` — [Screenshots](#screenshots) |
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
 | **Monitoring** | 2 | Postgres `conversation_logs` + Streamlit feedback + Grafana **7 panels** — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json), `:3002` — [Screenshots](#screenshots) |
 | **Containerization** | 2 | `docker compose up -d postgres grafana streamlit` — [`Dockerfile`](Dockerfile), [`docker-compose.yaml`](docker-compose.yaml) |
-| **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `uv.lock` / `pyproject.toml` (Python ≥3.12), policy + eval data in `data/` |
+| **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `uv.lock` / `pyproject.toml` (Python ≥ 3.12), policy + eval data in `data/` |
 | **Best practice: hybrid search** | +1 | Default `PRA_RETRIEVAL_METHOD=hybrid` — [`app/hybrid.py`](app/hybrid.py) |
 | **Best practice: re-ranking** | +1 | **RRF** fusion of keyword + vector ranked lists (same module) |
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
-| **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo `scripts/demo_part_c_tools.py` |
-| **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; `scripts/demo_part_d_safety.py` |
+| **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py) |
+| **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
 
 ### Gaps (honest)
 
 | Item | Status |
 |------|--------|
 | Cloud deployment | Not deployed (local Docker + host Streamlit only) |
-| Full LLM judge on all 26 eval cases | Smoke run only (`eval_results_judge_smoke.json`); extend with `python -m app.evaluate` (full mode) |
-| Public git remote | Local workspace on **E:**; push when submission repo is ready |
+| Full LLM judge on all 26 eval cases | Smoke run only; extend with `python -m app.evaluate` (full mode) |
 
 ### Quick verification commands
 
@@ -185,27 +184,27 @@ docker compose up -d postgres grafana streamlit              # full stack
 
 ---
 
-## Troubleshooting (문제해결)
+## Troubleshooting
 
-Grafana가 안 열리거나 컨테이너가 한꺼번에 멈출 때:
+If Grafana or containers stop responding:
 
-1. **`docker info` / `docker ps`가 멈추면** → 개별 Grafana 문제가 아니라 **Docker 엔진(WSL2) hang**. Docker Desktop 종료 → `wsl --shutdown` → Desktop 재실행 → 초록불 대기.
-2. 엔진이 살아난 뒤:
+1. **`docker info` / `docker ps` hangs** — this is a Docker engine (WSL2) hang, not a Grafana-specific issue. Quit Docker Desktop → `wsl --shutdown` → restart Desktop → wait for the green "Engine running" indicator.
+2. Once the engine is back:
 
 ```powershell
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
 docker compose up -d
 ```
 
-3. Postgres가 `healthy`인지 확인한 다음 **http://localhost:3002** 접속.
+3. Confirm Postgres shows `healthy`, then open **http://localhost:3002**.
 
-포트 구분: `:3000` / `:3001`은 다른 프로젝트 Grafana. **PRA는 `:3002`만**.
+Port map: `:3000` / `:3001` belong to other project stacks. **PRA uses `:3002` only**.
 
-자세한 증상·원인·체크리스트: [`docs/DOCKER_TROUBLESHOOT.md`](docs/DOCKER_TROUBLESHOOT.md).
+Detailed symptoms, root causes, and a step-by-step checklist: [`docs/DOCKER_TROUBLESHOOT.md`](docs/DOCKER_TROUBLESHOOT.md).
 
 ---
 
 ## License
 
-- **Code:** TBD (MIT planned)
+- **Code:** MIT
 - **Policy text:** synthetic Zakard Shop document in `data/refund_policy.md`, created for this demo
