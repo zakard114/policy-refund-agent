@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "openai>=1.50",
     "python-dotenv>=1.0",
-    "minsearch>=0.0.12",
+    "minsearch>=0.0.11,<0.1",
     "streamlit>=1.32",
     "psycopg[binary]>=3.1",
     "numpy>=1.26",

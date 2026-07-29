@@ -2,8 +2,8 @@
 # Keep lean. streamlit is preinstalled on Community Cloud.
 openai>=1.50,<2
 python-dotenv>=1.0
-# Pin: newer minsearch majors may change the Index API used by app/search.py
-minsearch==0.0.12
+# 0.0.12 was never published on PyPI; 0.0.11 matches course Index API
+minsearch==0.0.11
 numpy>=1.26,<3
 # Optional Postgres logging (fails soft if DB unreachable)
 psycopg-binary>=3.1
