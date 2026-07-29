@@ -32,6 +32,12 @@ Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics u
 |------|-------------|
 | `compose/streamlit-compose-refund.png` | Compose `:8502` — refund answer + Citations + **Feedback recorded: helpful 👍** |
 
+### Cloud deployment
+
+| File | Description |
+|------|-------------|
+| `cloud/streamlit-cloud-zk1001.png` | https://policy-refund-agent.streamlit.app/ — agent tools, `ZK-1001` eligible, Cloud logs |
+
 ## Archive
 
 | Path | Description |
