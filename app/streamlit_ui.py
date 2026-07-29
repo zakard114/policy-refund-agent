@@ -37,9 +37,9 @@ def main() -> None:
         )
         num_results = st.slider("Sections retrieved", min_value=1, max_value=5, value=3)
         try:
-            from app.llm import get_model
+            from app.config import get_model_name
 
-            st.markdown(f"**Model:** `{get_model()}`")
+            st.markdown(f"**Model:** `{get_model_name()}`")
         except Exception as exc:  # noqa: BLE001
             st.markdown(f"**Model:** *(unavailable: {type(exc).__name__})*")
         if use_agent:
