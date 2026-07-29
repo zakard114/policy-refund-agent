@@ -18,6 +18,7 @@
       "id": "ko_period_window",
       "label": "answerable",
       "question": "환불 기한이 언제야?",
+      "notes": "Korean: When is the refund deadline?",
       "expected_section_ids": ["1._refund_period"],
       "expected_facts": ["7일"]
     },
@@ -25,6 +26,7 @@
       "id": "es_period_days",
       "label": "answerable",
       "question": "¿Cuántos días tengo para pedir un reembolso?",
+      "notes": "Spanish: How many days do I have to request a refund?",
       "expected_section_ids": ["1._refund_period"],
       "expected_facts": ["7"]
     },
@@ -53,6 +55,7 @@
       "id": "ko_nonrefund_electronics",
       "label": "answerable",
       "question": "전자기기를 전원 켠 후에도 환불이 되나요?",
+      "notes": "Korean: Can I get a refund after powering on an electronic device?",
       "expected_section_ids": ["2._non-refundable_conditions"],
       "expected_facts": ["전원"]
     },
@@ -109,6 +112,7 @@
       "id": "ko_contact_hours",
       "label": "answerable",
       "question": "고객센터 운영 시간이 어떻게 되나요?",
+      "notes": "Korean: What are the customer service hours?",
       "expected_section_ids": ["4._contact_information"],
       "expected_facts": ["9"]
     },
@@ -158,6 +162,7 @@
       "id": "ko_unanswerable_warranty",
       "label": "unanswerable",
       "question": "제품 보증 기간은 몇 년인가요?",
+      "notes": "Korean: How many years is the product warranty?",
       "expected_section_ids": [],
       "expected_facts": []
     },
