@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: PRA
+    orgId: 1
+    folder: Policy Refund Agent
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-07-18T08:41:18.371228+00:00",
+  "mode": "full",
+  "summary": {
+    "total_cases": 3,
+    "answerable_cases": 3,
+    "unanswerable_cases": 0,
+    "hit_rate": {
+      "@1": {
+        "rate": 1.0,
+        "hits": 3,
+        "n": 3
+      },
+      "@3": {
+        "rate": 1.0,
+        "hits": 3,
+        "n": 3
+      },
+      "@5": {
+        "rate": 1.0,
+        "hits": 3,
+        "n": 3
+      }
+    },
+    "mrr": {
+      "score": 1.0,
+      "n": 3
+    },
+    "fact_pass_rate": {
+      "rate": 1.0,
+      "passed": 3,
+      "n": 3
+    },
+    "llm_judge": {
+      "n": 3,
+      "relevance": 5.0,
+      "accuracy": 5.0,
+      "tone": 5.0,
+      "mean": 5.0,
+      "note": "Same-model judge (Gemma); treat as relative signal, not absolute truth."
+    }
+  },
+  "cases": [
+    {
+      "case_id": "en_period_deadline",
+      "question": "What is the refund deadline after I receive the product?",
+      "label": "answerable",
+      "search_query": "What is the refund deadline after I receive the product? period 7 days",
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "retrieved_ids": [
+        "1._refund_period",
+        "3._refund_process",
+        "2._non-refundable_conditions"
+      ],
+      "reciprocal_rank": 1.0,
+      "hit_at": {
+        "@1": true,
+        "@3": true,
+        "@5": true
+      },
+      "facts_passed": true,
+      "missing_facts": [],
+      "answer": "Hello! You can request a refund within 7 days of receiving your product.",
+      "judge_relevance": 5,
+      "judge_accuracy": 5,
+      "judge_tone": 5,
+      "judge_mean": 5.0,
+      "judge_comment": "The answer is direct, accurate according to the policy, and polite."
+    },
+    {
+      "case_id": "en_period_change_of_mind",
+      "question": "Can I return an item just because I changed my mind?",
+      "label": "answerable",
+      "search_query": "Can I return an item just because I changed my mind?",
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "retrieved_ids": [
+        "1._refund_period",
+        "3._refund_process"
+      ],
+      "reciprocal_rank": 1.0,
+      "hit_at": {
+        "@1": true,
+        "@3": true,
+        "@5": true
+      },
+      "facts_passed": true,
+      "missing_facts": [],
+      "answer": "Yes, you can request a refund for a change of mind as long as the product remains undamaged.\n\nPlease keep the following details in mind:\n*   The request must be made within **7 days** of receiving the product.\n*   To start the process, click the **Request Refund** button in **My Page**, select your reason, and attach the relevant photos.",
+      "judge_relevance": 5,
+      "judge_accuracy": 5,
+      "judge_tone": 5,
+      "judge_mean": 5.0,
+      "judge_comment": "The reply accurately and politely addresses the customer's question using all relevant policy details."
+    },
+    {
+      "case_id": "ko_period_window",
+      "question": "환불 기한이 언제야?",
+      "label": "answerable",
+      "search_query": "\"refund period\" deadline days after delivery 환불 기한이 언제야? refund period 7",
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "retrieved_ids": [
+        "1._refund_period",
+        "3._refund_process",
+        "2._non-refundable_conditions"
+      ],
+      "reciprocal_rank": 1.0,
+      "hit_at": {
+        "@1": true,
+        "@3": true,
+        "@5": true
+      },
+      "facts_passed": true,
+      "missing_facts": [],
+      "answer": "안녕하세요, Zakard Shop 고객지원팀입니다.\n\n환불 요청은 제품을 수령하신 후 **7일 이내**에 가능합니다.\n\n추가로 참고하실 사항은 다음과 같습니다:\n* 단순 변심으로 인한 환불은 제품이 손상되지 않은 상태여야 가능합니다.",
+      "judge_relevance": 5,
+      "judge_accuracy": 5,
+      "judge_tone": 5,
+      "judge_mean": 5.0,
+      "judge_comment": "The reply accurately answers the question based on the policy and maintains a professional tone."
+    }
+  ]
+}

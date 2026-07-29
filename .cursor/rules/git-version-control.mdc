@@ -1,0 +1,10 @@
+---
+description: Git — no AI co-author; track rules only
+alwaysApply: true
+---
+
+# Git & version control
+
+- **No** `Co-authored-by` or AI signatures in commit messages.
+- **Track** `.cursor/rules/` in Git.
+- **Ignore** `.cursor/history/`, `.cursor/temp/` in `.gitignore`.

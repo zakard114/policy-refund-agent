@@ -1,0 +1,26 @@
+# Module 5-3 — conversation_logs on pra-postgres (:5435), same DB the app writes to.
+# host.docker.internal reaches the host-mapped port from inside pra-grafana.
+apiVersion: 1
+
+# Force recreate so URL/user/password actually update (Grafana often keeps old secureJsonData).
+deleteDatasources:
+  - name: PRA Postgres
+    orgId: 1
+
+datasources:
+  - name: PRA Postgres
+    type: postgres
+    uid: pra-postgres
+    access: proxy
+    url: host.docker.internal:5435
+    user: pra
+    secureJsonData:
+      password: pra
+    jsonData:
+      database: policy_refund_agent
+      sslmode: disable
+      postgresVersion: 1700
+      timescaledb: false
+    isDefault: true
+    editable: true
+    version: 2
