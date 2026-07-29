@@ -1,7 +1,8 @@
-# Streamlit Community Cloud / plain pip install
-openai>=1.50
+# Streamlit Community Cloud (uv/pip). Keep this lean.
+# streamlit is preinstalled on Community Cloud — pin only if needed.
+openai>=1.50,<2
 python-dotenv>=1.0
 minsearch>=0.0.12
-streamlit>=1.32
-psycopg[binary]>=3.1
-numpy>=1.26
+numpy>=1.26,<3
+# Psycopg 3 binary wheel (optional logging; Q&A works without Postgres)
+psycopg-binary>=3.1
