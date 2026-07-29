@@ -29,7 +29,8 @@ _REFUSAL_HINT_RE = re.compile(
     r"not\s+able\s+to|"
     r"customer\s+service|contact\s+(support|customer)|02-1234-5678|"
     r"1:1\s+chat|"
-    r"확인\s*할\s*수\s*없|정책에\s*없|고객센터|문의해\s*주"
+    # Korean refusal markers (multilingual support)
+    r"\ud655\uc778\s*\ud560\s*\uc218\s*\uc5c6|\uc815\ucc45\uc5d0\s*\uc5c6|\uace0\uac1d\uc13c\ud130|\ubb38\uc758\ud574\s*\uc8fc"
     r")",
     re.IGNORECASE,
 )
@@ -42,10 +43,13 @@ SAFE_FALLBACK_EN = (
 )
 
 SAFE_FALLBACK_KO = (
-    "해당 내용은 Zakard Shop 환불·반품 정책에서 확인할 수 없어 "
-    "추측으로 답변드리지 않습니다.\n\n"
-    "고객센터(**02-1234-5678**) 또는 **1:1 채팅**으로 문의해 주세요. "
-    "(평일 **9:00–18:00**)"
+    # Korean localized fallback (same content as English version).
+    "\ud574\ub2f9 \ub0b4\uc6a9\uc740 Zakard Shop \ud658\ubd88\u00b7\ubc18\ud488 "
+    "\uc815\ucc45\uc5d0\uc11c \ud655\uc778\ud560 \uc218 \uc5c6\uc5b4 "
+    "\ucd94\uce21\uc73c\ub85c \ub2f5\ubcc0\ub4dc\ub9ac\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.\n\n"
+    "\uace0\uac1d\uc13c\ud130(**02-1234-5678**) \ub610\ub294 **1:1 "
+    "\ucc44\ud305**\uc73c\ub85c \ubb38\uc758\ud574 \uc8fc\uc138\uc694. "
+    "(\ud3c9\uc77c **9:00\u201318:00**)"
 )
 
 SAFETY_PROMPT_ADDON = """
@@ -75,7 +79,7 @@ _OOS_TOPIC_RE = re.compile(
     r"shipping\s+cost|international\s+shipping|"
     r"gift\s*card|store\s+credit|"
     r"loyalty\s+(program|points)|points\s+.*expire|"
-    r"warranty\s+(period|years?)|보증\s*기간|"
+    r"warranty\s+(period|years?)|\ubcf4\uc99d\s*\uae30\uac04|"
     r"amazon'?s?\s+refund|competitor"
     r")",
     re.IGNORECASE,
