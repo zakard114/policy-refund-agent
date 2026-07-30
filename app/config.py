@@ -43,6 +43,7 @@ def load_app_env() -> None:
         "POSTGRES_DB",
         "POSTGRES_USER",
         "POSTGRES_PASSWORD",
+        "POSTGRES_SSLMODE",
     ):
         if project_env.get(key):
             os.environ[key] = project_env[key]
