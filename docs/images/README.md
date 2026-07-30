@@ -2,6 +2,12 @@
 
 For README and portfolio use.
 
+## Hero
+
+| File | Description |
+|------|-------------|
+| `readme-hero-banner.png` | README top banner — Zakard Shop Policy Support |
+
 ## Canonical (README)
 
 ### Hybrid retrieval

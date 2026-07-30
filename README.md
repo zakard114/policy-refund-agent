@@ -1,6 +1,13 @@
 # Policy & Refund Support Agent
 
+![Zakard Shop Policy Support — hero banner](docs/images/readme-hero-banner.png)
+
 **Grounded policy RAG for e-commerce refund support** — retrieve policy clauses, answer with citations, refuse safely when context is missing, and measure quality with an offline eval harness.
+
+Built as a capstone project for [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp).
+
+**Live demo:** https://policy-refund-agent.streamlit.app/  
+Try: `Can I refund order ZK-1001?` (eligible) · sidebar **Agent tools** on.
 
 ---
 
@@ -120,6 +127,79 @@ python scripts\demo_part_c_tools.py --with-llm
 Compose Streamlit image must be rebuilt after code changes: `docker compose up -d --build streamlit`.
 
 `scripts/use_e_drive.ps1` is optional (keeps uv/HF caches on the author’s `E:` drive). Skip it if you use default cache locations.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    User["User"]
+    ST["Streamlit UI<br/>:8502 / Cloud"]
+    Agent["Agent path<br/>app/agent.py"]
+    RAG["RAG path<br/>app/llm.py"]
+    Tools["Tools<br/>lookup_order · evaluate_refund · search_policy"]
+    Hybrid["Hybrid RRF<br/>app/hybrid.py"]
+    KW["Keyword<br/>minsearch"]
+    Vec["Vector ranks<br/>TF-IDF / pgvector"]
+    Policy["Policy KB<br/>data/refund_policy.md"]
+    LLM["LLM<br/>Cerebras Gemma"]
+    Safety["Safety guards<br/>app/safety.py"]
+    PG[("Postgres / Neon<br/>conversation_logs")]
+    GF["Grafana<br/>:3002"]
+    Kestra["Kestra<br/>ingest flow :8085"]
+
+    User --> ST
+    ST --> Agent
+    ST --> RAG
+    Agent --> Tools
+    Tools --> Hybrid
+    RAG --> Hybrid
+    Hybrid --> KW
+    Hybrid --> Vec
+    KW --> Policy
+    Vec --> Policy
+    Agent --> LLM
+    RAG --> LLM
+    LLM --> Safety
+    Safety --> ST
+    ST --> PG
+    PG --> GF
+    Kestra --> Policy
+
+    style Hybrid fill:#0f766e,color:#fff
+    style LLM fill:#b45309,color:#fff
+    style PG fill:#1e3a5f,color:#fff
+    style GF fill:#c2410c,color:#fff
+    style Safety fill:#334155,color:#fff
+```
+
+**Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
+
+---
+
+## Decisions and trade-offs
+
+- **Hybrid RRF over keyword-only:** keyword is strong on this small structured policy; vector ranks help paraphrases. RRF fuses both without a learned re-ranker. Trade-off: more moving parts than pure TF-IDF.
+- **Cerebras Gemma over larger hosted models:** Zoomcamp-friendly cost/latency; Cloud secrets use the same OpenAI-compatible client. Trade-off: tool-calling quirks → deterministic tool fallback in [`app/agent.py`](app/agent.py).
+- **Streamlit over Flask/FastAPI UI:** matches the course interface criterion and deploys cleanly to Community Cloud. Trade-off: less flexible as a pure JSON API.
+- **Neon (optional) for Cloud logging:** local Compose keeps Postgres on `:5435`; Cloud 👍 needs a reachable DB → free Neon + `POSTGRES_SSLMODE=require`. Grafana can point at the same DB via `PRA_PG_*`.
+- **Mock orders for tools:** `data/mock_orders.json` demos eligibility without a real OMS. Trade-off: not production order data.
+- **In-memory TF-IDF vector ranks on Cloud:** pgvector is optional; Cloud still runs hybrid RRF without a vector DB volume.
+
+---
+
+## Project structure
+
+```text
+app/                 # Streamlit UI, RAG, hybrid RRF, agent tools, safety, eval
+data/                # Policy, mock orders, eval sets + results
+flows/               # Kestra ingestion
+grafana/             # Provisioned dashboard + Postgres datasource
+scripts/             # Demos and offline eval helpers
+streamlit_app.py     # Cloud / Compose entrypoint
+docker-compose.yaml  # postgres · grafana · streamlit · kestra
+```
 
 ---
 
