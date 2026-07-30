@@ -54,6 +54,13 @@ services:
       GF_DATABASE_USER: user
       GF_DATABASE_PASSWORD: pswd
       GF_DATABASE_SSL_MODE: disable
+      # Dashboard datasource (conversation_logs). Defaults = local pra-postgres.
+      # For Neon: set PRA_PG_HOST=ep-xxx.neon.tech:5432, PRA_PG_SSLMODE=require, etc. in .env
+      PRA_PG_HOST: ${PRA_PG_HOST:-host.docker.internal:5435}
+      PRA_PG_USER: ${PRA_PG_USER:-${POSTGRES_USER:-pra}}
+      PRA_PG_PASSWORD: ${PRA_PG_PASSWORD:-${POSTGRES_PASSWORD:-pra}}
+      PRA_PG_DB: ${PRA_PG_DB:-${POSTGRES_DB:-policy_refund_agent}}
+      PRA_PG_SSLMODE: ${PRA_PG_SSLMODE:-disable}
     restart: unless-stopped
 
   # --- Streamlit app (Module 5-4b) ------------------------------------------
@@ -67,6 +74,8 @@ services:
       - "8502:8502"
     # Project .env has Postgres + PRA_LLM_BACKEND; shared ZoomCamp file has
     # CEREBRAS_* (host Streamlit loads it via app/env_paths — Docker cannot).
+    # For Cloud-like Neon logging in the container, set POSTGRES_* + POSTGRES_SSLMODE
+    # in project .env (overrides compose defaults below when present via env_file).
     env_file:
       - .env
       - E:/IT_SPACES/AI/ZoomCamp/LLM/.env

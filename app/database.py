@@ -39,13 +39,20 @@ _MIGRATE = (
 
 
 def _dsn() -> str:
+    """Build a libpq URL. Set POSTGRES_SSLMODE=require for Neon/Supabase."""
+    from urllib.parse import quote_plus
+
     load_app_env()
     host = os.getenv("POSTGRES_HOST", "localhost")
     port = os.getenv("POSTGRES_PORT", "5435")
     db = os.getenv("POSTGRES_DB", "policy_refund_agent")
-    user = os.getenv("POSTGRES_USER", "pra")
-    password = os.getenv("POSTGRES_PASSWORD", "pra")
-    return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+    user = quote_plus(os.getenv("POSTGRES_USER", "pra"))
+    password = quote_plus(os.getenv("POSTGRES_PASSWORD", "pra"))
+    sslmode = (os.getenv("POSTGRES_SSLMODE") or "disable").strip() or "disable"
+    return (
+        f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        f"?sslmode={sslmode}"
+    )
 
 
 def _connect():

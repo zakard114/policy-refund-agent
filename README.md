@@ -227,9 +227,38 @@ How to redeploy:
 
 Notes:
 
-- Without Postgres secrets, Q&A and Citations still work; **👍/👎 feedback is unavailable on Cloud** (logging needs Postgres — use the local Docker stack for monitoring demos).
+- **Neon Postgres (optional):** enable Cloud 👍/👎 by adding `POSTGRES_*` + `POSTGRES_SSLMODE=require` to Streamlit Secrets (see [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example)). Point local Grafana at the same DB with `PRA_PG_*` in `.env`, then `docker compose up -d grafana`.
+- Without Postgres secrets, Q&A and Citations still work; **👍/👎 feedback is unavailable on Cloud**.
 - Hybrid RRF uses **in-memory TF-IDF** vector ranks when pgvector is unavailable.
-- Full monitoring (Grafana + `conversation_logs`) remains on the local Docker stack (`:3002`).
+- Full monitoring UI remains on local Grafana (`:3002`) even when the app DB is Neon.
+
+### Neon setup (Cloud thumbs + shared Grafana DB)
+
+1. Create a free project at [console.neon.tech](https://console.neon.tech).
+2. Copy connection fields (host, port `5432`, database, user, password). Prefer the **pooled** connection host if shown.
+3. Streamlit Cloud → your app → **Settings → Secrets** — append:
+
+```toml
+POSTGRES_HOST = "ep-xxxx.region.aws.neon.tech"
+POSTGRES_PORT = "5432"
+POSTGRES_DB = "neondb"
+POSTGRES_USER = "neondb_owner"
+POSTGRES_PASSWORD = "your-neon-password"
+POSTGRES_SSLMODE = "require"
+```
+
+4. **Reboot** the Streamlit app. Ask `Can I refund order ZK-1001?` → 👍/👎 should appear (not “Feedback unavailable”).
+5. (Optional) Local Grafana on Neon — in project `.env`:
+
+```env
+PRA_PG_HOST=ep-xxxx.region.aws.neon.tech:5432
+PRA_PG_USER=neondb_owner
+PRA_PG_PASSWORD=your-neon-password
+PRA_PG_DB=neondb
+PRA_PG_SSLMODE=require
+```
+
+Then: `docker compose up -d grafana` and open http://localhost:3002 (admin/admin). Re-take monitoring screenshots if panels update from Cloud traffic.
 
 ---
 
