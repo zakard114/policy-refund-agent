@@ -141,12 +141,19 @@ Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -
 
 ![Streamlit Compose — refund + feedback](docs/images/compose/streamlit-compose-refund.png)
 
-### Cloud deployment (Streamlit Community Cloud)
+### Cloud (Streamlit Community Cloud)
 
 Live public app — https://policy-refund-agent.streamlit.app/  
-Agent tools on; demo order `ZK-1001` → **eligible**; Cloud manage-app log visible.
+Agent tools on; demo order `ZK-1001` → **eligible**.
 
-![Streamlit Cloud — ZK-1001 eligible](docs/images/cloud/streamlit-cloud-zk1001.png)
+| Shot | File |
+|------|------|
+| UI only (no manage-app log) | [`docs/images/cloud/streamlit-cloud-zk1001-ui.png`](docs/images/cloud/streamlit-cloud-zk1001-ui.png) |
+| UI + Cloud manage-app log | [`docs/images/cloud/streamlit-cloud-zk1001.png`](docs/images/cloud/streamlit-cloud-zk1001.png) |
+
+![Streamlit Cloud — ZK-1001 (UI)](docs/images/cloud/streamlit-cloud-zk1001-ui.png)
+
+![Streamlit Cloud — ZK-1001 (with deploy log)](docs/images/cloud/streamlit-cloud-zk1001.png)
 
 ---
 
@@ -170,7 +177,7 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
 | **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py) |
 | **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
-| **Bonus: cloud deployment** | +2 | Live app https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment), screenshot [`docs/images/cloud/streamlit-cloud-zk1001.png`](docs/images/cloud/streamlit-cloud-zk1001.png) |
+| **Bonus: cloud deployment** | +2 | Live app https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Cloud](#cloud-streamlit-community-cloud) |
 
 ### Quick verification commands
 
@@ -188,17 +195,18 @@ docker compose up -d postgres grafana streamlit              # full stack
 
 ## Cloud deployment
 
-Public demo on **Streamlit Community Cloud** (bonus criterion).
-
-1. Push this repo to GitHub (already: `https://github.com/zakard114/policy-refund-agent`).
-2. Open [share.streamlit.io](https://share.streamlit.io/) → **New app**.
-3. Select repository `zakard114/policy-refund-agent`, branch `main`, **Main file path** `streamlit_app.py`.
-4. In **Advanced settings → Secrets**, paste TOML from [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) and set a real `CEREBRAS_API_KEY`.
-5. Deploy. After it is live, put the app URL here:
+Public demo on **Streamlit Community Cloud** (bonus criterion).  
+Screenshots: [Screenshots → Cloud](#cloud-streamlit-community-cloud).
 
 **Live app:** https://policy-refund-agent.streamlit.app/
 
-![Streamlit Cloud — ZK-1001 eligible](docs/images/cloud/streamlit-cloud-zk1001.png)
+How to redeploy:
+
+1. Push this repo to GitHub (`https://github.com/zakard114/policy-refund-agent`).
+2. Open [share.streamlit.io](https://share.streamlit.io/) → **New app**.
+3. Repository `zakard114/policy-refund-agent`, branch `main`, **Main file path** `streamlit_app.py`.
+4. **Advanced settings → Secrets**: paste TOML from [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) and set a real `CEREBRAS_API_KEY`. Python **3.12**.
+5. Deploy.
 
 Notes:
 
@@ -231,3 +239,4 @@ Detailed symptoms, root causes, and a step-by-step checklist: [`docs/DOCKER_TROU
 
 - **Code:** MIT
 - **Policy text:** synthetic Zakard Shop document in `data/refund_policy.md`, created for this demo
+thetic Zakard Shop document in `data/refund_policy.md`, created for this demo

@@ -52,6 +52,53 @@ def _citations_from_policy_tool(payload: dict[str, Any]) -> list[dict]:
     return out
 
 
+def _citations_from_refund_decision(payload: dict[str, Any]) -> list[dict]:
+    """Map evaluate_refund policy_refs to full policy sections (for UI citations)."""
+    from app.ingest import load_policies
+
+    refs = [str(r) for r in (payload.get("policy_refs") or []) if r]
+    if not refs:
+        return []
+
+    by_section = {
+        str(doc.get("section") or "").strip().lower(): doc for doc in load_policies()
+    }
+    out: list[dict] = []
+    seen: set[str] = set()
+    for ref in refs:
+        key = ref.strip().lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        doc = by_section.get(key)
+        if doc is None:
+            # Fallback: match by section prefix / substring
+            for section_key, candidate in by_section.items():
+                if key in section_key or section_key in key:
+                    doc = candidate
+                    break
+        if doc is None:
+            out.append(
+                {
+                    "id": key.replace(" ", "_"),
+                    "section": ref,
+                    "text": "",
+                    "source": "evaluate_refund",
+                    "retrieval": "agent",
+                }
+            )
+            continue
+        out.append(
+            {
+                "id": doc.get("id", ""),
+                "section": doc.get("section", ref),
+                "text": (doc.get("text") or "").strip(),
+                "source": "evaluate_refund",
+                "retrieval": "agent",
+            }
+        )
+    return out
+
 def _assistant_tool_message(msg: Any) -> dict[str, Any]:
     tool_calls = []
     for tc in msg.tool_calls or []:
@@ -142,6 +189,8 @@ def _run_tool_loop(question: str, *, max_rounds: int = 6) -> ChatResult:
             result = dispatch_tool(name, args)
             if name == "search_policy" and isinstance(result, dict):
                 citations.extend(_citations_from_policy_tool(result))
+            elif name == "evaluate_refund" and isinstance(result, dict):
+                citations.extend(_citations_from_refund_decision(result))
             messages.append(
                 {
                     "role": "tool",
@@ -172,6 +221,8 @@ def _fallback_with_tools(question: str) -> ChatResult:
         blocks.append(
             "evaluate_refund result:\n" + json.dumps(decision, ensure_ascii=False, indent=2)
         )
+        if isinstance(decision, dict):
+            citations.extend(_citations_from_refund_decision(decision))
         policy = dispatch_tool(
             "search_policy",
             {"query": prepared.search_query or "refund period process non-refundable", "num_results": 3},
