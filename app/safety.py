@@ -1,4 +1,8 @@
-"""Safety guards for out-of-scope / prompt-injection (Part 6-2)."""
+"""Safety guards for out-of-scope / prompt-injection (Part 6-2).
+
+Korean strings below use \\uXXXX escapes so source stays ASCII-readable for
+international reviewers. English meaning is documented next to each block.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +25,9 @@ _INJECTION_RE = re.compile(
     re.IGNORECASE,
 )
 
+# English markers + Korean refusal markers (unicode-escaped below).
+# Korean fragments mean roughly: "cannot confirm" / "not in the policy" /
+# "customer service" / "please contact".
 _REFUSAL_HINT_RE = re.compile(
     r"("
     r"don'?t\s+have|do\s+not\s+have|not\s+(covered|in\s+(the\s+)?policy)|"
@@ -29,7 +36,6 @@ _REFUSAL_HINT_RE = re.compile(
     r"not\s+able\s+to|"
     r"customer\s+service|contact\s+(support|customer)|02-1234-5678|"
     r"1:1\s+chat|"
-    # Korean refusal markers (multilingual support)
     r"\ud655\uc778\s*\ud560\s*\uc218\s*\uc5c6|\uc815\ucc45\uc5d0\s*\uc5c6|\uace0\uac1d\uc13c\ud130|\ubb38\uc758\ud574\s*\uc8fc"
     r")",
     re.IGNORECASE,
@@ -42,8 +48,8 @@ SAFE_FALLBACK_EN = (
     "(weekdays **9:00 AM – 6:00 PM**)."
 )
 
+# Korean UI fallback (same meaning as SAFE_FALLBACK_EN), unicode-escaped.
 SAFE_FALLBACK_KO = (
-    # Korean localized fallback (same content as English version).
     "\ud574\ub2f9 \ub0b4\uc6a9\uc740 Zakard Shop \ud658\ubd88\u00b7\ubc18\ud488 "
     "\uc815\ucc45\uc5d0\uc11c \ud655\uc778\ud560 \uc218 \uc5c6\uc5b4 "
     "\ucd94\uce21\uc73c\ub85c \ub2f5\ubcc0\ub4dc\ub9ac\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.\n\n"
@@ -74,6 +80,7 @@ def looks_like_safe_refusal(answer: str) -> bool:
     return bool(_REFUSAL_HINT_RE.search(answer or ""))
 
 
+# Out-of-scope topic detectors. Korean fragment \\ubcf4\\uc99d \\uae30\\uac04 = "warranty period".
 _OOS_TOPIC_RE = re.compile(
     r"("
     r"shipping\s+cost|international\s+shipping|"

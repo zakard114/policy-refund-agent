@@ -28,7 +28,18 @@ Support teams need answers **strictly from policy documents** and consistent ref
 
 ## Status
 
-**Status:** Capstone-ready — RAG + hybrid RRF + Streamlit (local Docker **and** [Streamlit Community Cloud](#cloud-deployment)) + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
+**Capstone-ready** — RAG + hybrid RRF + Streamlit (local Docker **and** [Streamlit Community Cloud](#cloud-deployment)) + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
+
+### Paths (read this first)
+
+Commands below assume you are in the **repository root** after cloning.
+
+| | |
+|--|--|
+| **Your machine** | Whatever path you cloned into, e.g. `~/policy-refund-agent` or `C:\dev\policy-refund-agent` |
+| **Example used in this README** | `E:\IT_SPACES\AI\Projects\llm\policy-refund-agent` (author’s Windows layout — **not required**) |
+
+Replace the example `cd …` with your own clone path. Relative paths like `data/`, `app/`, and `docker compose` are the same everywhere.
 
 ---
 
@@ -39,8 +50,9 @@ Support teams need answers **strictly from policy documents** and consistent ref
 | App LLM | **Gemma on Cerebras** (OpenAI-compatible) | `PRA_LLM_BACKEND=cerebras`, `CEREBRAS_*` in `.env` |
 
 ```powershell
+# Example path (replace with your clone root):
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
-. .\scripts\use_e_drive.ps1
+. .\scripts\use_e_drive.ps1   # optional: author Windows cache layout on E:
 copy .env.example .env        # set CEREBRAS_API_KEY inside
 uv sync
 uv run pra-check-llm
@@ -61,8 +73,9 @@ uv run pra-check-llm
 **Recommended:** Postgres + Grafana + Streamlit via Compose.
 
 ```powershell
+# Example path (replace with your clone root):
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
-. .\scripts\use_e_drive.ps1
+. .\scripts\use_e_drive.ps1   # optional
 copy .env.example .env   # if missing — set CEREBRAS_API_KEY
 docker compose up -d postgres grafana streamlit
 docker compose ps
@@ -82,8 +95,9 @@ Optional orchestration UI: `docker compose up -d kestra-postgres kestra` → htt
 ### Dev alternative (host Python)
 
 ```powershell
+# Example path (replace with your clone root):
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
-. .\scripts\use_e_drive.ps1
+. .\scripts\use_e_drive.ps1   # optional
 uv sync
 uv run pra-check-llm
 docker compose stop streamlit   # free :8502 if container is up
@@ -105,7 +119,7 @@ python scripts\demo_part_c_tools.py --with-llm
 
 Compose Streamlit image must be rebuilt after code changes: `docker compose up -d --build streamlit`.
 
-All data and Docker volumes use **E:** paths — see [`AGENTS.md`](AGENTS.md).
+`scripts/use_e_drive.ps1` is optional (keeps uv/HF caches on the author’s `E:` drive). Skip it if you use default cache locations.
 
 ---
 
@@ -161,6 +175,8 @@ Agent tools on; demo order `ZK-1001` → **eligible**.
 
 Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/project.md) (0–2 points per row unless noted). Peer reviewers can follow the **Evidence** links.
 
+Rows marked **capstone extra** are **implemented** features that are not fixed-score criteria; they are candidates for the rubric’s **optional bonus (max +3, reviewer decides)** — not unfinished work.
+
 | Criterion | Target | Evidence in this repo |
 |-----------|--------|------------------------|
 | **Problem description** | 2 | [Problem](#problem) — Zakard Shop refund support; synthetic KB in [`data/refund_policy.md`](data/refund_policy.md) |
@@ -175,15 +191,16 @@ Maps this repo to the [LLM Zoomcamp project rubric](https://github.com/DataTalks
 | **Best practice: hybrid search** | +1 | Default `PRA_RETRIEVAL_METHOD=hybrid` — [`app/hybrid.py`](app/hybrid.py) |
 | **Best practice: re-ranking** | +1 | **RRF** fusion of keyword + vector ranked lists (same module) |
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
-| **Agent / tools** (capstone extra) | — | [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py) |
-| **Safety** (capstone extra) | — | [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
+| **Agent / tools** (capstone extra) | optional bonus (max +3, reviewer decides) | Not a fixed rubric row — candidate for the official discretionary extra points. Implemented: [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py); Cloud demo `ZK-1001` |
+| **Safety** (capstone extra) | optional bonus (max +3, reviewer decides) | Same optional pool as above (implemented, not unfinished). [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; demo [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
 | **Bonus: cloud deployment** | +2 | Live app https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Cloud](#cloud-streamlit-community-cloud) |
 
 ### Quick verification commands
 
 ```powershell
+# Example path (replace with your clone root):
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
-. .\scripts\use_e_drive.ps1
+. .\scripts\use_e_drive.ps1   # optional
 uv run --no-sync python -m app.evaluate --retrieval-only   # retrieval metrics
 python scripts\demo_part_c_tools.py                          # agent tools (3 decisions)
 python scripts\demo_part_d_safety.py                         # unanswerable + injection (6 cases)
@@ -210,7 +227,8 @@ How to redeploy:
 
 Notes:
 
-- Without Postgres secrets, Q&A still works: hybrid RRF uses **in-memory TF-IDF** vector ranks when pgvector is unavailable; conversation logging fails soft.
+- Without Postgres secrets, Q&A and Citations still work; **👍/👎 feedback is unavailable on Cloud** (logging needs Postgres — use the local Docker stack for monitoring demos).
+- Hybrid RRF uses **in-memory TF-IDF** vector ranks when pgvector is unavailable.
 - Full monitoring (Grafana + `conversation_logs`) remains on the local Docker stack (`:3002`).
 
 ---
@@ -223,6 +241,7 @@ If Grafana or containers stop responding:
 2. Once the engine is back:
 
 ```powershell
+# Example path (replace with your clone root):
 cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
 docker compose up -d
 ```
@@ -239,4 +258,3 @@ Detailed symptoms, root causes, and a step-by-step checklist: [`docs/DOCKER_TROU
 
 - **Code:** MIT
 - **Policy text:** synthetic Zakard Shop document in `data/refund_policy.md`, created for this demo
-thetic Zakard Shop document in `data/refund_policy.md`, created for this demo

@@ -1,6 +1,7 @@
 {
   "generated_at": "2026-07-18T08:41:18.371228+00:00",
   "mode": "full",
+  "language_note": "Smoke subset may include Korean questions/answers. English glosses: data/eval_data.json notes.",
   "summary": {
     "total_cases": 3,
     "answerable_cases": 3,

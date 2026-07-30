@@ -1,148 +1,234 @@
 {
+  "description": "Offline evaluation cases for retrieval + answer quality. English is the default. Korean / Spanish / French questions are intentional multilingual tests; each non-English case has an English gloss in its notes field.",
   "cases": [
     {
       "id": "en_period_deadline",
       "label": "answerable",
       "question": "What is the refund deadline after I receive the product?",
-      "expected_section_ids": ["1._refund_period"],
-      "expected_facts": ["7 days"]
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "expected_facts": [
+        "7 days"
+      ]
     },
     {
       "id": "en_period_change_of_mind",
       "label": "answerable",
       "question": "Can I return an item just because I changed my mind?",
-      "expected_section_ids": ["1._refund_period"],
-      "expected_facts": ["undamaged"]
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "expected_facts": [
+        "undamaged"
+      ]
     },
     {
       "id": "ko_period_window",
       "label": "answerable",
       "question": "환불 기한이 언제야?",
-      "notes": "Korean: When is the refund deadline?",
-      "expected_section_ids": ["1._refund_period"],
-      "expected_facts": ["7일"]
+      "notes": "Korean question (kept for multilingual eval): 'When is the refund deadline?'. expected_facts uses the Korean phrase for '7 days'.",
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "expected_facts": [
+        "7일"
+      ]
     },
     {
       "id": "es_period_days",
       "label": "answerable",
       "question": "¿Cuántos días tengo para pedir un reembolso?",
-      "notes": "Spanish: How many days do I have to request a refund?",
-      "expected_section_ids": ["1._refund_period"],
-      "expected_facts": ["7"]
+      "notes": "Spanish question (kept for multilingual eval): 'How many days do I have to request a refund?'",
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "expected_facts": [
+        "7"
+      ]
     },
     {
       "id": "en_nonrefund_negligence",
       "label": "answerable",
       "question": "Can I get a refund if I damaged the product myself?",
-      "expected_section_ids": ["2._non-refundable_conditions"],
-      "expected_facts": ["negligence"]
+      "expected_section_ids": [
+        "2._non-refundable_conditions"
+      ],
+      "expected_facts": [
+        "negligence"
+      ]
     },
     {
       "id": "en_nonrefund_label",
       "label": "answerable",
       "question": "What happens if I removed the product label or opened the package?",
-      "expected_section_ids": ["2._non-refundable_conditions"],
-      "expected_facts": ["label"]
+      "expected_section_ids": [
+        "2._non-refundable_conditions"
+      ],
+      "expected_facts": [
+        "label"
+      ]
     },
     {
       "id": "en_nonrefund_electronics",
       "label": "answerable",
       "question": "I turned on my new electronic device — can I still refund it?",
-      "expected_section_ids": ["2._non-refundable_conditions"],
-      "expected_facts": ["powering on"]
+      "expected_section_ids": [
+        "2._non-refundable_conditions"
+      ],
+      "expected_facts": [
+        "powering on"
+      ]
     },
     {
       "id": "ko_nonrefund_electronics",
       "label": "answerable",
       "question": "전자기기를 전원 켠 후에도 환불이 되나요?",
-      "notes": "Korean: Can I get a refund after powering on an electronic device?",
-      "expected_section_ids": ["2._non-refundable_conditions"],
-      "expected_facts": ["전원"]
+      "notes": "Korean question (kept for multilingual eval): 'Can I get a refund after powering on an electronic device?'. expected_facts uses the Korean word for 'power / powered on'.",
+      "expected_section_ids": [
+        "2._non-refundable_conditions"
+      ],
+      "expected_facts": [
+        "전원"
+      ]
     },
     {
       "id": "en_process_how",
       "label": "answerable",
       "question": "How can I get a refund?",
-      "expected_section_ids": ["3._refund_process"],
-      "expected_facts": ["Request Refund", "3 business days"]
+      "expected_section_ids": [
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "Request Refund",
+        "3 business days"
+      ]
     },
     {
       "id": "en_process_photos",
       "label": "answerable",
       "question": "Do I need to attach photos when requesting a refund?",
-      "expected_section_ids": ["3._refund_process"],
-      "expected_facts": ["photos"]
+      "expected_section_ids": [
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "photos"
+      ]
     },
     {
       "id": "en_process_mypage",
       "label": "answerable",
       "question": "Where do I click to start a refund request?",
-      "expected_section_ids": ["3._refund_process"],
-      "expected_facts": ["My Page"]
+      "expected_section_ids": [
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "My Page"
+      ]
     },
     {
       "id": "fr_process_request",
       "label": "answerable",
       "question": "Comment puis-je demander un remboursement?",
-      "expected_section_ids": ["3._refund_process"],
-      "expected_facts": ["Request Refund", "jours ouvrables"]
+      "notes": "French question (kept for multilingual eval): 'How can I request a refund?'. expected_facts 'jours ouvrables' means 'business days'.",
+      "expected_section_ids": [
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "Request Refund",
+        "jours ouvrables"
+      ]
     },
     {
       "id": "en_process_sla",
       "label": "answerable",
       "question": "How long does it take for Customer Service to complete a refund?",
-      "expected_section_ids": ["3._refund_process"],
-      "expected_facts": ["3 business days"]
+      "expected_section_ids": [
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "3 business days"
+      ]
     },
     {
       "id": "en_contact_phone",
       "label": "answerable",
       "question": "What is the customer service phone number?",
-      "expected_section_ids": ["4._contact_information"],
-      "expected_facts": ["02-1234-5678"]
+      "expected_section_ids": [
+        "4._contact_information"
+      ],
+      "expected_facts": [
+        "02-1234-5678"
+      ]
     },
     {
       "id": "en_contact_hours",
       "label": "answerable",
       "question": "When is customer support available?",
-      "expected_section_ids": ["4._contact_information"],
-      "expected_facts": ["9:00"]
+      "expected_section_ids": [
+        "4._contact_information"
+      ],
+      "expected_facts": [
+        "9:00"
+      ]
     },
     {
       "id": "ko_contact_hours",
       "label": "answerable",
       "question": "고객센터 운영 시간이 어떻게 되나요?",
-      "notes": "Korean: What are the customer service hours?",
-      "expected_section_ids": ["4._contact_information"],
-      "expected_facts": ["9"]
+      "notes": "Korean question (kept for multilingual eval): 'What are the customer service hours?'",
+      "expected_section_ids": [
+        "4._contact_information"
+      ],
+      "expected_facts": [
+        "9"
+      ]
     },
     {
       "id": "en_contact_chat",
       "label": "answerable",
       "question": "Can I use 1:1 chat support for refund questions?",
-      "expected_section_ids": ["4._contact_information"],
-      "expected_facts": ["1:1"]
+      "expected_section_ids": [
+        "4._contact_information"
+      ],
+      "expected_facts": [
+        "1:1"
+      ]
     },
     {
       "id": "en_period_synonym_window",
       "label": "answerable",
       "question": "How many days do I have to request a return after delivery?",
-      "expected_section_ids": ["1._refund_period"],
-      "expected_facts": ["7 days"]
+      "expected_section_ids": [
+        "1._refund_period"
+      ],
+      "expected_facts": [
+        "7 days"
+      ]
     },
     {
       "id": "en_slang_money_back",
       "label": "answerable",
       "question": "yo can I get my money back if this junk broke itself?",
-      "expected_section_ids": ["1._refund_period", "2._non-refundable_conditions", "3._refund_process"],
-      "expected_facts": ["7 days"]
+      "expected_section_ids": [
+        "1._refund_period",
+        "2._non-refundable_conditions",
+        "3._refund_process"
+      ],
+      "expected_facts": [
+        "7 days"
+      ]
     },
     {
       "id": "en_slang_cs_hours",
       "label": "answerable",
       "question": "when can I hit up support / customer care?",
-      "expected_section_ids": ["4._contact_information"],
-      "expected_facts": ["9:00"]
+      "expected_section_ids": [
+        "4._contact_information"
+      ],
+      "expected_facts": [
+        "9:00"
+      ]
     },
     {
       "id": "en_unanswerable_shipping",
@@ -162,7 +248,7 @@
       "id": "ko_unanswerable_warranty",
       "label": "unanswerable",
       "question": "제품 보증 기간은 몇 년인가요?",
-      "notes": "Korean: How many years is the product warranty?",
+      "notes": "Korean question (kept for multilingual eval): 'How many years is the product warranty?' (out of policy scope)",
       "expected_section_ids": [],
       "expected_facts": []
     },
