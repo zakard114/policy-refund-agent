@@ -162,7 +162,13 @@ def _render_feedback(msg_idx: int, message: dict[str, Any]) -> None:
         st.session_state.messages[msg_idx] = message
 
     if not log_id:
-        st.caption("Feedback unavailable (conversation was not logged).")
+        from app.database import last_db_error
+
+        detail = last_db_error()
+        if detail:
+            st.caption(f"Feedback unavailable (DB): {detail}")
+        else:
+            st.caption("Feedback unavailable (conversation was not logged).")
         return
 
     existing = message.get("feedback")

@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 _SCHEMA_READY = False
 _SCHEMA_LOCK = threading.Lock()
+_LAST_ERROR: str | None = None
 
 DDL = """
 CREATE TABLE IF NOT EXISTS conversation_logs (
@@ -38,27 +39,42 @@ _MIGRATE = (
 )
 
 
+def last_db_error() -> str | None:
+    """Most recent logging/connect failure (for UI diagnostics)."""
+    return _LAST_ERROR
+
+
 def _dsn() -> str:
     """Build a libpq URL. Set POSTGRES_SSLMODE=require for Neon/Supabase."""
     from urllib.parse import quote_plus
 
     load_app_env()
-    host = os.getenv("POSTGRES_HOST", "localhost")
-    port = os.getenv("POSTGRES_PORT", "5435")
-    db = os.getenv("POSTGRES_DB", "policy_refund_agent")
-    user = quote_plus(os.getenv("POSTGRES_USER", "pra"))
-    password = quote_plus(os.getenv("POSTGRES_PASSWORD", "pra"))
+    host = (os.getenv("POSTGRES_HOST") or "localhost").strip()
+    # Accidental "host:5432" from Neon PGHOST copy → strip port (we set it separately).
+    if host.count(":") == 1 and host.rsplit(":", 1)[-1].isdigit():
+        host, port_in_host = host.rsplit(":", 1)
+        if not os.getenv("POSTGRES_PORT"):
+            os.environ["POSTGRES_PORT"] = port_in_host
+    port = (os.getenv("POSTGRES_PORT") or "5435").strip()
+    db = (os.getenv("POSTGRES_DB") or "policy_refund_agent").strip()
+    user = quote_plus((os.getenv("POSTGRES_USER") or "pra").strip())
+    password = quote_plus((os.getenv("POSTGRES_PASSWORD") or "pra").strip())
     sslmode = (os.getenv("POSTGRES_SSLMODE") or "disable").strip() or "disable"
-    return (
-        f"postgresql://{user}:{password}@{host}:{port}/{db}"
-        f"?sslmode={sslmode}"
-    )
+    # Neon connection strings include channel_binding=require; keep it for remote SSL.
+    qs = f"sslmode={sslmode}"
+    if sslmode in ("require", "verify-ca", "verify-full"):
+        qs += "&channel_binding=require"
+    return f"postgresql://{user}:{password}@{host}:{port}/{db}?{qs}"
 
 
 def _connect():
     import psycopg
 
-    return psycopg.connect(_dsn(), connect_timeout=5)
+    load_app_env()
+    # Neon free tier scales to zero — cold start often exceeds 5s.
+    sslmode = (os.getenv("POSTGRES_SSLMODE") or "disable").strip().lower()
+    timeout = 30 if sslmode in ("require", "verify-ca", "verify-full") else 5
+    return psycopg.connect(_dsn(), connect_timeout=timeout)
 
 
 def ensure_schema() -> None:
@@ -120,7 +136,9 @@ def log_conversation(
                 ).fetchone()
                 conn.commit()
                 return int(row[0]) if row else None
-        except Exception:  # noqa: BLE001 — monitoring must not break Q&A
+        except Exception as exc:  # noqa: BLE001 — monitoring must not break Q&A
+            global _LAST_ERROR
+            _LAST_ERROR = f"{type(exc).__name__}: {exc}"
             logger.exception("conversation_logs insert failed")
             return None
 
@@ -163,6 +181,8 @@ def save_feedback(
             )
             conn.commit()
             return cur.rowcount > 0
-    except Exception:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
+        global _LAST_ERROR
+        _LAST_ERROR = f"{type(exc).__name__}: {exc}"
         logger.exception("conversation_logs feedback update failed (id=%s)", log_id)
         return False
