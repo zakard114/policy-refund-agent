@@ -149,6 +149,10 @@ Grafana: http://localhost:3002 · Streamlit: http://localhost:8502
 
 ![Grafana after live ask + feedback](docs/images/monitoring/grafana-after.png)
 
+Optional — same dashboard with Grafana datasource pointed at **Neon** (Cloud `conversation_logs`):
+
+![Grafana after Cloud traffic on Neon](docs/images/monitoring/grafana-neon-after.png)
+
 ### Docker Compose (Streamlit in container)
 
 Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -d streamlit`).
@@ -158,7 +162,7 @@ Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -
 ### Cloud (Streamlit Community Cloud)
 
 Live public app — https://policy-refund-agent.streamlit.app/  
-Agent tools on; demo order `ZK-1001` → **eligible**.
+Agent tools on; demo order `ZK-1001` → **eligible**; Cloud 👍 via Neon Postgres.
 
 | Shot | File |
 |------|------|
