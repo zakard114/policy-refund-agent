@@ -21,18 +21,37 @@ os.environ.setdefault("STREAMLIT_SERVER_FILE_WATCHER_TYPE", "none")
 
 
 def _apply_streamlit_secrets() -> None:
-    """Map Streamlit Cloud secrets → env vars before app.config loads."""
+    """Map Streamlit Cloud secrets → env vars before app.config loads.
+
+    Postgres keys always override (Cloud Neon must beat any empty/default host).
+    Other keys use setdefault so local shell exports still win when intended.
+    """
     try:
         import streamlit as st
 
         secrets = getattr(st, "secrets", None)
         if secrets is None:
             return
+        force_keys = {
+            "POSTGRES_HOST",
+            "POSTGRES_PORT",
+            "POSTGRES_DB",
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
+            "POSTGRES_SSLMODE",
+        }
         for key in secrets:
             value = secrets[key]
             if isinstance(value, dict):
                 continue
-            os.environ.setdefault(str(key), str(value))
+            name = str(key)
+            text = str(value).strip()
+            if not text:
+                continue
+            if name in force_keys:
+                os.environ[name] = text
+            else:
+                os.environ.setdefault(name, text)
     except Exception:  # noqa: BLE001 — local/dev without secrets.toml is fine
         return
 
