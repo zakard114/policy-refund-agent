@@ -1,6 +1,7 @@
 {
   "generated_at": "2026-07-29T09:34:23.521632+00:00",
   "mode": "full",
+  "language_note": "Some cases keep Korean/Spanish/French questions and model answers for multilingual eval fidelity. English glosses for those questions are in data/eval_data.json (notes).",
   "summary": {
     "total_cases": 26,
     "answerable_cases": 20,
