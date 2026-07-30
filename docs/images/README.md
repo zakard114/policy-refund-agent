@@ -45,6 +45,7 @@ Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics u
 |------|-------------|
 | `cloud/streamlit-cloud-zk1001-ui.png` | Clean UI — `ZK-1001` eligible + 👍/feedback (no manage-app log) |
 | `cloud/streamlit-cloud-zk1001.png` | Same answer + Cloud manage-app / install log |
+| `cloud/streamlit-cloud-zk1001-ko.png` | Korean Q&A — `language: Korean`, agent tools, citations |
 
 ## Archive
 

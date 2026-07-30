@@ -248,10 +248,15 @@ Agent tools on; demo order `ZK-1001` → **eligible**; Cloud 👍 via Neon Postg
 |------|------|
 | UI only (no manage-app log) | [`docs/images/cloud/streamlit-cloud-zk1001-ui.png`](docs/images/cloud/streamlit-cloud-zk1001-ui.png) |
 | UI + Cloud manage-app log | [`docs/images/cloud/streamlit-cloud-zk1001.png`](docs/images/cloud/streamlit-cloud-zk1001.png) |
+| Korean question (multilingual) | [`docs/images/cloud/streamlit-cloud-zk1001-ko.png`](docs/images/cloud/streamlit-cloud-zk1001-ko.png) |
 
 ![Streamlit Cloud — ZK-1001 (UI)](docs/images/cloud/streamlit-cloud-zk1001-ui.png)
 
 ![Streamlit Cloud — ZK-1001 (with deploy log)](docs/images/cloud/streamlit-cloud-zk1001.png)
+
+![Streamlit Cloud — Korean ZK-1001](docs/images/cloud/streamlit-cloud-zk1001-ko.png)
+
+`language: Korean` · agent tools · citations — query rewriting + answer-in-user-language.
 
 ---
 
