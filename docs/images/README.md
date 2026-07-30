@@ -23,6 +23,7 @@ Stable aliases (same bytes as hybrid):
 | `monitoring/grafana-before.png` | Cold start — Questions `0` / No data |
 | `monitoring/streamlit-feedback.png` | Live ask + Citations + **Feedback recorded: helpful 👍** |
 | `monitoring/grafana-after.png` | After ask — latency, citations, **Thumbs up ≥ 1** |
+| `monitoring/grafana-neon-after.png` | Optional — Grafana on Neon (Cloud thumbs / logs) |
 
 Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics update.
 
@@ -36,7 +37,7 @@ Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics u
 
 | File | Description |
 |------|-------------|
-| `cloud/streamlit-cloud-zk1001-ui.png` | Clean UI only — `ZK-1001` eligible (no manage-app log) |
+| `cloud/streamlit-cloud-zk1001-ui.png` | Clean UI — `ZK-1001` eligible + 👍/feedback (no manage-app log) |
 | `cloud/streamlit-cloud-zk1001.png` | Same answer + Cloud manage-app / install log |
 
 ## Archive
