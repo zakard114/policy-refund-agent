@@ -57,8 +57,12 @@
     cfg = Object.assign(cfg, data || {});
     const insightsOpen = document.getElementById("insights-open");
     if (insightsOpen && cfg.insights_url) insightsOpen.href = cfg.insights_url;
-    const gh = document.getElementById("link-github");
-    if (gh && cfg.github_url) gh.href = cfg.github_url;
+    ["github-open", "github-readme"].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (!el || !cfg.github_url) return;
+      if (id === "github-readme") el.href = cfg.github_url.replace(/\/?$/, "") + "#readme";
+      else el.href = cfg.github_url;
+    });
     fillSelect(
       modelSelect,
       cfg.models && cfg.models.length ? cfg.models : [cfg.model || "unknown"],
@@ -112,7 +116,7 @@
 
   bootProduct();
 
-  /* ---- Hub SPA: Product / Insights / Integrate slide ---- */
+  /* ---- Hub SPA: Product / Insights / Integrate / GitHub slide ---- */
   const hubNav = document.getElementById("hub-nav");
   const brandHome = document.getElementById("brand-home");
   const insightsFrame = document.getElementById("insights-frame");
@@ -121,12 +125,11 @@
   let currentView = "product";
   let currentOrder = 0;
   let sliding = false;
-  const loaded = { product: true, insights: false, integrate: false };
+  const loaded = { product: true, insights: false, integrate: false, github: true };
 
   function setHubActive(view) {
     if (!hubNav) return;
     hubNav.querySelectorAll(".hub-item[data-view]").forEach(function (el) {
-      if (el.classList.contains("external")) return;
       el.classList.toggle("active", el.getAttribute("data-view") === view);
     });
   }
@@ -153,6 +156,7 @@
     if (view === "product") return window.location.origin + "/";
     if (view === "insights") return cfg.insights_url || "";
     if (view === "integrate") return window.location.origin + "/docs";
+    if (view === "github") return cfg.github_url || "";
     return "";
   }
 
@@ -180,7 +184,6 @@
     const exit = forward ? "is-exit-left" : "is-exit-right";
 
     toEl.classList.add(prep);
-    // Force layout so the prep transform applies before animating in.
     void toEl.offsetWidth;
 
     fromEl.classList.add(exit);
@@ -202,7 +205,6 @@
     hubNav.addEventListener("click", function (e) {
       const item = e.target.closest(".hub-item");
       if (!item || item.id === "ops-btn") return;
-      if (item.classList.contains("external")) return;
       const view = item.getAttribute("data-view");
       if (!view) return;
       e.preventDefault();
@@ -216,7 +218,7 @@
     hubNav.addEventListener("auxclick", function (e) {
       if (e.button !== 1) return;
       const item = e.target.closest(".hub-item");
-      if (!item || item.id === "ops-btn" || item.classList.contains("external")) return;
+      if (!item || item.id === "ops-btn") return;
       const view = item.getAttribute("data-view");
       if (!view) return;
       e.preventDefault();
@@ -226,9 +228,17 @@
 
   if (brandHome) {
     brandHome.addEventListener("click", function (e) {
-      if (isModifiedClick(e)) return; // let browser open "/" in new tab via href
-      e.preventDefault();
-      goToView("product", 0);
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) {
+        openViewNewTab("product");
+        return;
+      }
+      if (currentView !== "product") {
+        goToView("product", 0);
+        return;
+      }
+      const productView = document.getElementById("view-product");
+      if (productView) productView.scrollTop = 0;
+      if (input) input.focus();
     });
   }
 
