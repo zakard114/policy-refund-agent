@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/styles.css?v=13">
+<link rel="stylesheet" href="/static/styles.css?v=14">
 <style>
   html, body {
     margin: 0;
@@ -155,7 +155,16 @@
           </div>
           <label class="rail-toggle">
             <input type="checkbox" id="use-tools" checked>
-            <span>Agent tools</span>
+            <span class="rail-toggle-text">
+              Agent tools
+              <span class="tip-wrap">
+                <span class="tip" tabindex="0" aria-describedby="agent-tools-tip" onclick="event.preventDefault(); event.stopPropagation();">?</span>
+                <span class="tip-bubble" id="agent-tools-tip" role="tooltip">
+                  On: order lookup + refund check + policy search.
+                  Off: policy RAG only (no order tools).
+                </span>
+              </span>
+            </span>
           </label>
           <p class="rail-help">Whitelist models only. Demo orders: ZK-1001…</p>
         </aside>
