@@ -300,8 +300,10 @@ body {
 
 .bubble.typing {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-width: min(280px, 85%);
   color: var(--muted);
   font-size: 0.86rem;
 }

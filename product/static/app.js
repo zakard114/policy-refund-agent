@@ -1,4 +1,6 @@
 (function () {
+  const bootScreen = document.getElementById("boot-screen");
+  const bootStatus = document.getElementById("boot-status");
   const messagesEl = document.getElementById("messages");
   const form = document.getElementById("chat-form");
   const input = document.getElementById("question-input");
@@ -26,6 +28,19 @@
     ops_configured: false,
   };
 
+  function setBootStatus(text) {
+    if (bootStatus) bootStatus.textContent = text;
+  }
+
+  function hideBoot() {
+    if (!bootScreen) return;
+    bootScreen.classList.add("is-done");
+    bootScreen.setAttribute("aria-busy", "false");
+    window.setTimeout(function () {
+      if (bootScreen && bootScreen.parentNode) bootScreen.parentNode.removeChild(bootScreen);
+    }, 400);
+  }
+
   function fillSelect(el, values, selected) {
     if (!el) return;
     el.innerHTML = "";
@@ -38,20 +53,63 @@
     });
   }
 
-  fetch("/config")
-    .then((r) => r.json())
-    .then((data) => {
-      cfg = Object.assign(cfg, data || {});
-      const insights = document.getElementById("link-insights");
-      if (insights && cfg.insights_url) insights.href = cfg.insights_url;
-      const gh = document.getElementById("link-github");
-      if (gh && cfg.github_url) gh.href = cfg.github_url;
-      fillSelect(modelSelect, cfg.models && cfg.models.length ? cfg.models : [cfg.model || "unknown"], cfg.model);
-      fillSelect(retrievalSelect, cfg.retrieval_options || ["hybrid", "keyword", "vector"], cfg.retrieval || "hybrid");
-    })
-    .catch(function () {
-      fillSelect(modelSelect, ["unavailable"], "unavailable");
-    });
+  function applyConfig(data) {
+    cfg = Object.assign(cfg, data || {});
+    const insights = document.getElementById("link-insights");
+    if (insights && cfg.insights_url) insights.href = cfg.insights_url;
+    const gh = document.getElementById("link-github");
+    if (gh && cfg.github_url) gh.href = cfg.github_url;
+    fillSelect(
+      modelSelect,
+      cfg.models && cfg.models.length ? cfg.models : [cfg.model || "unknown"],
+      cfg.model
+    );
+    fillSelect(
+      retrievalSelect,
+      cfg.retrieval_options || ["hybrid", "keyword", "vector"],
+      cfg.retrieval || "hybrid"
+    );
+  }
+
+  function bootProduct() {
+    const started = Date.now();
+    const minMs = 1200;
+    let slowTimer = window.setTimeout(function () {
+      setBootStatus("Waking free tier… first request can take a minute");
+    }, 4000);
+    let laterTimer = window.setTimeout(function () {
+      setBootStatus("Still starting — Render cold start in progress");
+    }, 15000);
+
+    function finish(ok) {
+      window.clearTimeout(slowTimer);
+      window.clearTimeout(laterTimer);
+      setBootStatus(ok ? "Ready" : "Ready (limited config)");
+      const wait = Math.max(0, minMs - (Date.now() - started));
+      window.setTimeout(hideBoot, wait);
+    }
+
+    // Health first (survives cold start), then config.
+    fetch("/health")
+      .then(function (r) {
+        if (!r.ok) throw new Error("health");
+        setBootStatus("Loading settings…");
+        return fetch("/config");
+      })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        applyConfig(data);
+        finish(true);
+      })
+      .catch(function () {
+        fillSelect(modelSelect, ["unavailable"], "unavailable");
+        finish(false);
+      });
+  }
+
+  bootProduct();
 
   function scrollToBottom() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -69,15 +127,28 @@
     return wrap;
   }
 
+  let typingTimer = null;
+
   function showTyping() {
+    hideTyping();
     const wrap = document.createElement("div");
     wrap.className = "msg assistant";
     const bubble = document.createElement("div");
     bubble.className = "bubble typing";
     const label = document.createElement("span");
-    label.textContent = toolsToggle.checked
-      ? "Checking order tools & policy…"
-      : "Searching policy & drafting…";
+    const phases = toolsToggle.checked
+      ? [
+          "Checking order tools & policy…",
+          "Running agent tools…",
+          "Drafting grounded answer…",
+        ]
+      : [
+          "Searching policy…",
+          "Ranking citations…",
+          "Drafting grounded answer…",
+        ];
+    let phase = 0;
+    label.textContent = phases[0];
     const dots = document.createElement("span");
     dots.className = "dots";
     for (let i = 0; i < 3; i++) {
@@ -90,10 +161,18 @@
     wrap.appendChild(bubble);
     messagesEl.appendChild(wrap);
     typingEl = wrap;
+    typingTimer = window.setInterval(function () {
+      phase = (phase + 1) % phases.length;
+      label.textContent = phases[phase];
+    }, 2800);
     scrollToBottom();
   }
 
   function hideTyping() {
+    if (typingTimer) {
+      window.clearInterval(typingTimer);
+      typingTimer = null;
+    }
     if (typingEl) {
       typingEl.remove();
       typingEl = null;
