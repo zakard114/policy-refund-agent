@@ -4,16 +4,18 @@
   --panel: #151c24;
   --panel-2: #1a222c;
   --border: #243040;
-  --text: #e8edf5;
-  --muted: #8b97a8;
+  --text: #c5ced9;
+  --text-strong: #d5dde8;
+  --muted: #8793a3;
   --teal: #00d1c1;
   --teal-dim: #0d9488;
-  --teal-bright: #2dd4bf;
+  --teal-bright: #5ecfc4;
   --teal-soft: rgba(0, 209, 193, 0.14);
-  --teal-glow: rgba(0, 209, 193, 0.28);
+  --teal-glow: rgba(0, 209, 193, 0.22);
   --user: #0f3d3a;
-  --user-text: #f0fdfa;
-  --error: #fca5a5;
+  --user-text: #d4e8e4;
+  --on-teal: #e6f4f2;
+  --error: #e7a0a0;
   --error-soft: #3f1d1d;
   --radius: 12px;
   --font: "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -65,7 +67,7 @@ body {
   cursor: pointer;
   font-family: inherit;
 }
-.brand-link:hover .logo { color: #f0fdfa; }
+.brand-link:hover .logo { color: var(--text-strong); }
 .brand-link:hover .shop { color: var(--teal-bright); }
 .brand-link:focus-visible {
   outline: 1px solid rgba(0, 209, 193, 0.55);
@@ -109,9 +111,9 @@ body {
 }
 .hub-item:hover { color: var(--teal-bright); background: var(--teal-soft); }
 .hub-item.active {
-  color: #ccfbf1;
+  color: #b7e4dc;
   background: var(--teal-soft);
-  border-color: rgba(0, 209, 193, 0.45);
+  border-color: rgba(0, 209, 193, 0.4);
   font-weight: 600;
 }
 .hub-item.ops { opacity: 0.55; }
@@ -236,7 +238,7 @@ body {
 }
 .repo-tags li {
   font-size: 0.75rem;
-  color: #ccfbf1;
+  color: #b7e4dc;
   border: 1px solid rgba(0, 209, 193, 0.28);
   background: var(--teal-soft);
   border-radius: 999px;
@@ -256,7 +258,7 @@ body {
   padding: 11px 18px;
   border-radius: 999px;
   background: var(--teal-dim);
-  color: #fff;
+  color: var(--on-teal);
   text-decoration: none;
   font-weight: 600;
   font-size: 0.9rem;
@@ -332,7 +334,7 @@ body {
 .rail-btn.primary {
   background: var(--teal-dim);
   border-color: var(--teal-dim);
-  color: #fff;
+  color: var(--on-teal);
 }
 .rail-btn.primary:hover {
   background: var(--teal);
@@ -377,7 +379,7 @@ body {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 8px;
-  color: #99f6e4;
+  color: #9ec9c2;
   font-size: 0.72rem;
   white-space: pre-wrap;
   max-height: 220px;
@@ -457,7 +459,7 @@ body {
   font-size: 0.8rem;
   cursor: pointer;
 }
-.rail-btn:hover { border-color: var(--teal); color: #ccfbf1; }
+.rail-btn:hover { border-color: var(--teal); color: #b7e4dc; }
 
 .maincol { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .hero { margin-bottom: 4px; }
@@ -468,6 +470,7 @@ body {
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 1.2;
+  color: var(--text-strong);
 }
 .hero-accent {
   color: #7dd3c7;
@@ -501,7 +504,7 @@ body {
 .chips button:hover {
   border-color: var(--teal);
   background: var(--teal-soft);
-  color: #ccfbf1;
+  color: #b7e4dc;
 }
 
 .panel {
@@ -544,7 +547,7 @@ body {
   font-family: inherit;
 }
 .clear-chat:hover {
-  color: #ccfbf1;
+  color: #b7e4dc;
   background: var(--teal-soft);
 }
 
@@ -651,8 +654,8 @@ button.fb {
   font-size: 0.78rem;
   cursor: pointer;
 }
-button.fb:hover:not(:disabled) { border-color: var(--teal); color: #ccfbf1; }
-button.fb.on { background: var(--teal-soft); border-color: var(--teal); color: #ccfbf1; }
+button.fb:hover:not(:disabled) { border-color: var(--teal); color: #b7e4dc; }
+button.fb.on { background: var(--teal-soft); border-color: var(--teal); color: #b7e4dc; }
 button.fb:disabled { opacity: .5; cursor: not-allowed; }
 .hint { font-size: 0.72rem; color: var(--muted); }
 
@@ -681,7 +684,7 @@ button.fb:disabled { opacity: .5; cursor: not-allowed; }
   border: none;
   border-radius: 999px;
   background: var(--teal-dim);
-  color: #fff;
+  color: var(--on-teal);
   font-size: 0.92rem;
   font-weight: 600;
   cursor: pointer;
