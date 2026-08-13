@@ -45,7 +45,7 @@ services:
       - key: PRA_OPS_PASSWORD
         sync: false
       - key: PRA_ALLOWED_MODELS
-        value: gemma-4-31b,llama3.1-8b,qwen-3-32b
+        value: gemma-4-31b,gpt-oss-120b
   - type: web
     runtime: docker
     name: policy-refund-agent-api

@@ -60,8 +60,8 @@ def _allowed_models() -> list[str]:
     raw = (os.getenv("PRA_ALLOWED_MODELS") or "").strip()
     default = _default_model()
     if not raw:
-        # Demo whitelist: current default + common Cerebras OpenAI-compatible ids.
-        models = [default, "gemma-4-31b", "llama3.1-8b", "qwen-3-32b"]
+        # Cerebras public catalog (non-CN): production + current default preview.
+        models = [default, "gemma-4-31b", "gpt-oss-120b"]
     else:
         models = [m.strip() for m in raw.split(",") if m.strip()]
         if default not in models:
