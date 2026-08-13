@@ -149,6 +149,24 @@
     }
   }
 
+  function viewUrl(view) {
+    if (view === "product") return window.location.origin + "/";
+    if (view === "insights") return cfg.insights_url || "";
+    if (view === "integrate") return window.location.origin + "/docs";
+    return "";
+  }
+
+  function openViewNewTab(view) {
+    const url = viewUrl(view);
+    if (!url) return false;
+    window.open(url, "_blank", "noopener,noreferrer");
+    return true;
+  }
+
+  function isModifiedClick(e) {
+    return !!(e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1);
+  }
+
   function goToView(nextView, nextOrder) {
     if (sliding || nextView === currentView) return;
     const fromEl = document.getElementById("view-" + currentView);
@@ -188,13 +206,27 @@
       const view = item.getAttribute("data-view");
       if (!view) return;
       e.preventDefault();
+      if (isModifiedClick(e)) {
+        openViewNewTab(view);
+        return;
+      }
       const order = parseInt(item.getAttribute("data-order") || "0", 10);
       goToView(view, order);
+    });
+    hubNav.addEventListener("auxclick", function (e) {
+      if (e.button !== 1) return;
+      const item = e.target.closest(".hub-item");
+      if (!item || item.id === "ops-btn" || item.classList.contains("external")) return;
+      const view = item.getAttribute("data-view");
+      if (!view) return;
+      e.preventDefault();
+      openViewNewTab(view);
     });
   }
 
   if (brandHome) {
     brandHome.addEventListener("click", function (e) {
+      if (isModifiedClick(e)) return; // let browser open "/" in new tab via href
       e.preventDefault();
       goToView("product", 0);
     });
