@@ -4,15 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zakard Shop · Policy Support</title>
-<link rel="stylesheet" href="/static/styles.css?v=2">
+<link rel="stylesheet" href="/static/styles.css?v=3">
 <style>
-  /* Critical paint — visible even if /static is slow/cached */
   html, body {
     margin: 0;
     min-height: 100%;
     font-family: "Segoe UI", system-ui, sans-serif;
-    color: #1a2332;
-    background: linear-gradient(165deg, #c5d9ee 0%, #e8f0f8 38%, #b8cfe6 100%) !important;
+    color: #e8edf5;
+    background: #0f141c !important;
   }
 </style>
 </head>
@@ -31,39 +30,55 @@
     </nav>
   </header>
 
-  <div class="shell">
-    <section class="hero">
-      <h1>Refund answers grounded in policy</h1>
-      <p>Order-aware tools, citations, and safe abstain when the policy doesn’t cover it.</p>
-      <div class="chips" id="chips" aria-label="30-second demos">
-        <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
-        <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
-        <button type="button" data-q="주문 ZK-1001 환불할 수 있나요?">한국어 · ZK-1001</button>
+  <div class="layout">
+    <aside class="rail" aria-label="Settings">
+      <h2>Settings</h2>
+      <div class="rail-block">
+        <div class="rail-label">Model</div>
+        <code id="model-badge">…</code>
       </div>
-    </section>
+      <div class="rail-block">
+        <div class="rail-label">Retrieval</div>
+        <code id="retrieval-badge">hybrid</code>
+      </div>
+      <label class="rail-toggle">
+        <input type="checkbox" id="use-tools" checked>
+        <span>Agent tools</span>
+      </label>
+      <p class="rail-help">lookup_order · evaluate_refund · search_policy. Demo: ZK-1001…</p>
+      <button type="button" id="clear-chat" class="rail-btn">Clear chat</button>
+    </aside>
 
-    <section class="panel">
-      <main id="messages" aria-live="polite">
-        <div class="msg assistant welcome" id="welcome">
-          <div class="bubble">
-            Hi — I’m Zakard Shop policy support. Try a chip above, or ask about refunds, returns, or order <b>ZK-1001</b>.
-          </div>
+    <div class="maincol">
+      <section class="hero">
+        <h1>Refund answers grounded in policy</h1>
+        <p>Official Render Product. Streamlit Cloud is secondary.</p>
+        <div class="chips" id="chips" aria-label="30-second demos">
+          <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
+          <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
+          <button type="button" data-q="주문 ZK-1001 환불할 수 있나요?">한국어 · ZK-1001</button>
         </div>
-      </main>
+      </section>
 
-      <form id="chat-form" autocomplete="off">
-        <label class="toggle">
-          <input type="checkbox" id="use-tools" checked>
-          Agent tools
-        </label>
-        <input id="question-input" type="text" placeholder="Ask about refunds, returns, or order ZK-1001…" autofocus>
-        <button id="send-btn" type="submit">Ask</button>
-      </form>
-    </section>
+      <section class="panel">
+        <main id="messages" aria-live="polite">
+          <div class="msg assistant welcome" id="welcome">
+            <div class="bubble">
+              Hi — I’m Zakard Shop policy support. Try a chip above, or ask about refunds, returns, or order <b>ZK-1001</b>.
+            </div>
+          </div>
+        </main>
+
+        <form id="chat-form" autocomplete="off">
+          <input id="question-input" type="text" placeholder="Ask about refunds, returns, or order ZK-1001…" autofocus>
+          <button id="send-btn" type="submit">Ask</button>
+        </form>
+      </section>
+    </div>
   </div>
 
-  <p class="foot">Official Render Product · Streamlit Cloud is secondary · Answers use hybrid RAG</p>
+  <p class="foot">Product · Insights · Integrate on Render · Ops locked</p>
 
-<script src="/static/app.js?v=2"></script>
+<script src="/static/app.js?v=3"></script>
 </body>
 </html>

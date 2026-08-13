@@ -13,6 +13,11 @@ export GF_UNIFIED_ALERTING_ENABLED="${GF_UNIFIED_ALERTING_ENABLED:-false}"
 export GF_ANALYTICS_REPORTING_ENABLED="${GF_ANALYTICS_REPORTING_ENABLED:-false}"
 export GF_CHECK_FOR_UPDATES="${GF_CHECK_FOR_UPDATES:-false}"
 
+# Public Insights: anonymous Viewer (admin login still available).
+export GF_AUTH_ANONYMOUS_ENABLED="${GF_AUTH_ANONYMOUS_ENABLED:-true}"
+export GF_AUTH_ANONYMOUS_ORG_ROLE="${GF_AUTH_ANONYMOUS_ORG_ROLE:-Viewer}"
+export GF_USERS_DEFAULT_THEME="${GF_USERS_DEFAULT_THEME:-dark}"
+
 # Allow DATABASE_URL → PRA_PG_* (optional convenience on Render).
 if [ -n "${DATABASE_URL:-}" ] && [ -z "${PRA_PG_HOST:-}" ]; then
   rest="${DATABASE_URL#*://}"

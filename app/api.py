@@ -94,16 +94,28 @@ def product_home() -> FileResponse:
 
 @app.get("/config")
 def product_config() -> dict[str, str]:
+    from app.config import get_model_name
+
+    insights = os.getenv(
+        "PRA_INSIGHTS_URL",
+        "https://policy-refund-agent-grafana.onrender.com",
+    ).rstrip("/")
+    # Deep-link the monitoring dashboard (anonymous Viewer on Render).
+    if "/d/" not in insights:
+        insights = f"{insights}/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1"
+    try:
+        model = get_model_name()
+    except Exception:  # noqa: BLE001
+        model = os.getenv("LLM_MODEL") or os.getenv("CEREBRAS_MODEL") or "unknown"
     return {
-        "insights_url": os.getenv(
-            "PRA_INSIGHTS_URL",
-            "https://policy-refund-agent-grafana.onrender.com",
-        ),
+        "insights_url": insights,
         "github_url": os.getenv(
             "PRA_GITHUB_URL",
             "https://github.com/zakard114/policy-refund-agent",
         ),
         "integrate_path": "/docs",
+        "model": model,
+        "retrieval": retrieval_method(),
     }
 
 

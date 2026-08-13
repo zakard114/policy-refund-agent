@@ -5,8 +5,16 @@
   const sendBtn = document.getElementById("send-btn");
   const toolsToggle = document.getElementById("use-tools");
   const chips = document.getElementById("chips");
+  const clearBtn = document.getElementById("clear-chat");
+  const modelBadge = document.getElementById("model-badge");
+  const retrievalBadge = document.getElementById("retrieval-badge");
   let typingEl = null;
-  let cfg = { insights_url: "", github_url: "https://github.com/zakard114/policy-refund-agent" };
+  let cfg = {
+    insights_url: "",
+    github_url: "https://github.com/zakard114/policy-refund-agent",
+    model: "",
+    retrieval: "hybrid",
+  };
 
   fetch("/config")
     .then((r) => r.json())
@@ -16,8 +24,12 @@
       if (insights && cfg.insights_url) insights.href = cfg.insights_url;
       const gh = document.getElementById("link-github");
       if (gh && cfg.github_url) gh.href = cfg.github_url;
+      if (modelBadge) modelBadge.textContent = cfg.model || "unknown";
+      if (retrievalBadge) retrievalBadge.textContent = cfg.retrieval || "hybrid";
     })
-    .catch(function () {});
+    .catch(function () {
+      if (modelBadge) modelBadge.textContent = "unavailable";
+    });
 
   function scrollToBottom() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -149,16 +161,16 @@
         : "No answer returned.");
     const wrap = addMessage("assistant", answer);
     addCitations(wrap, data.citations, data.retrieval);
-    if (data.latency_s != null || data.model) {
+    if (data.latency_s != null || data.language) {
       const hint = document.createElement("div");
       hint.className = "hint";
       const bits = [];
-      if (data.model) bits.push(data.model);
       if (data.latency_s != null) bits.push(data.latency_s + "s");
       if (data.language) bits.push(data.language);
       hint.textContent = bits.join(" · ");
       wrap.appendChild(hint);
     }
+    if (data.model && modelBadge) modelBadge.textContent = data.model;
     addFeedback(wrap, data.log_id);
   }
 
@@ -228,4 +240,19 @@
     if (!btn || btn.disabled) return;
     ask(btn.getAttribute("data-q"));
   });
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", function () {
+      messagesEl.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "msg assistant welcome";
+      wrap.id = "welcome";
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML =
+        "Chat cleared. Try a chip above, or ask about refunds / order <b>ZK-1001</b>.";
+      wrap.appendChild(bubble);
+      messagesEl.appendChild(wrap);
+    });
+  }
 })();

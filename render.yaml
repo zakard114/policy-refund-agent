@@ -97,6 +97,10 @@ services:
       - key: GF_USERS_DEFAULT_THEME
         value: dark
       - key: GF_AUTH_ANONYMOUS_ENABLED
+        value: "true"
+      - key: GF_AUTH_ANONYMOUS_ORG_ROLE
+        value: Viewer
+      - key: GF_AUTH_DISABLE_LOGIN_FORM
         value: "false"
       - key: GF_INSTALL_PLUGINS
         value: ""
