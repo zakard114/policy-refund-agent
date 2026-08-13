@@ -113,6 +113,7 @@ uv sync
 uv run pra-check-llm
 docker compose stop streamlit   # free :8502 if container is up
 uv run --no-sync pra-streamlit
+uv run --no-sync pra-api        # Integrate API → http://localhost:8000/docs
 uv run --no-sync python -m app.evaluate --retrieval-only
 ```
 

@@ -110,14 +110,27 @@ def _looks_english(text: str) -> bool:
     return bool(_EN_MARKERS.search(text))
 
 
-def prepare_search_query(question: str) -> PreparedQuery:
-    """Detect language and produce an English query for minsearch."""
+def _guess_language(question: str) -> str:
+    if re.search(r"[\uac00-\ud7a3]", question or ""):
+        return "Korean"
+    if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", question or ""):
+        return "Japanese"
+    if _looks_english(question):
+        return "English"
+    return "English"
+
+
+def prepare_search_query(question: str, *, use_llm: bool = True) -> PreparedQuery:
+    """Detect language and produce an English query for minsearch.
+
+    ``use_llm=False`` skips the rewrite LLM (retrieval-only / no API key).
+    """
     question = question.strip()
 
-    if _looks_english(question):
+    if not use_llm or _looks_english(question):
         return PreparedQuery(
             original=question,
-            language="English",
+            language=_guess_language(question) if not use_llm else "English",
             search_query=expand_search_query(question),
         )
 

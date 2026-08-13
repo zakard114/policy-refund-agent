@@ -14,7 +14,7 @@ data/embeddings/
 data/eval_results.json
 data/index_manifest.json
 docs/
-grafana/
+# grafana/ must NOT be ignored — Render Grafana image COPYs from this tree
 flows/
 sql/
 scripts/

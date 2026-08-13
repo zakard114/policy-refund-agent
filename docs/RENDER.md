@@ -2,32 +2,105 @@
 
 Product + Insights run on **Render**. Streamlit Community Cloud is a **secondary** prototype only.
 
-## Blueprint
+## From your dashboard (step-by-step)
 
-1. Push `main` to GitHub.
-2. [Render](https://dashboard.render.com/) → **New** → **Blueprint** → select this repo (`render.yaml`).
-3. Create services:
-   - `policy-refund-agent` — Product (Streamlit interim; FastAPI Product comes in polish Phase 1–2)
-   - `policy-refund-agent-grafana` — Insights (Grafana → Neon)
-4. Fill **sync: false** env vars in the Dashboard (never commit secrets):
+You already see **Ungrouped Services** with old `Notes-Backend` — leave it alone. New services are separate.
 
-| Service | Required |
+### 0) Before Render
+
+1. Repo `zakard114/policy-refund-agent` `main` has `render.yaml` (already pushed for Phase 0).
+2. Keep Neon values ready (host / db / user / password). Do **not** paste them into GitHub.
+
+### 1) Start Blueprint
+
+1. Top-left / header **New** (not “Create your first project” — Project is optional grouping).
+2. Choose **Blueprint**.
+3. Connect GitHub if asked → pick **`zakard114/policy-refund-agent`**.
+4. Branch: **`main`**. Render reads root **`render.yaml`**.
+5. Review the service list, then continue / apply.
+
+Expected services (names may match exactly):
+
+| Service | Role |
+|---------|------|
+| `policy-refund-agent` | Product (Streamlit interim) |
+| `policy-refund-agent-api` | Integrate API (if present in `render.yaml` on `main`) |
+| `policy-refund-agent-grafana` | Insights |
+
+If API is missing on remote yet, Product + Grafana alone is enough for first bring-up.
+
+### 2) Region (Guam)
+
+Blueprint default in repo is **`oregon`** (same as your old Notes-Backend).
+
+| Region | From Guam |
+|--------|-----------|
+| **Singapore** | Usually best latency in Render’s common list |
+| Oregon | OK, a bit farther; fine if free-tier only offers this |
+
+**To use Singapore:** either edit each service’s **Region** in the Blueprint review UI before create, or tell the agent to change `region:` in `render.yaml` and push, then re-apply Blueprint.
+
+Free tier region availability changes; if Singapore is greyed out, stay on **Oregon**.
+
+### 3) Fill secrets (`sync: false`)
+
+Dashboard will ask for env vars marked sync:false. Use the **same Neon** as Streamlit Cloud thumbs.
+
+**Product** (`policy-refund-agent`) — and **API** if created:
+
+| Key | Value |
+|-----|--------|
+| `CEREBRAS_API_KEY` | your Cerebras key |
+| `POSTGRES_HOST` | Neon host only, e.g. `ep-….neon.tech` (pooled OK) |
+| `POSTGRES_DB` | e.g. `neondb` |
+| `POSTGRES_USER` | e.g. `neondb_owner` |
+| `POSTGRES_PASSWORD` | Neon password |
+
+(`POSTGRES_PORT=5432`, `POSTGRES_SSLMODE=require` are usually prefilled.)
+
+**Grafana** (`policy-refund-agent-grafana`):
+
+| Key | Value |
+|-----|--------|
+| `GF_SECURITY_ADMIN_PASSWORD` | pick a password (not `admin` in public if you can avoid it) |
+| `PRA_PG_HOST` | `ep-….neon.tech:5432` (host **with** port) |
+| `PRA_PG_USER` / `PRA_PG_PASSWORD` / `PRA_PG_DB` | same Neon |
+
+### 4) Wait for build
+
+1. Open each service → **Logs** / **Events**.
+2. First Docker build can take several minutes.
+3. Free tier sleeps when idle — first hit after sleep is slow.
+
+### 5) Smoke checks
+
+| Service | URL path |
 |---------|----------|
-| Product | `CEREBRAS_API_KEY`, `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
-| Grafana | `GF_SECURITY_ADMIN_PASSWORD`, `PRA_PG_HOST` (e.g. `ep-….neon.tech:5432`), `PRA_PG_USER`, `PRA_PG_PASSWORD`, `PRA_PG_DB` |
+| Product | `https://<product>.onrender.com/` and `/_stcore/health` |
+| API | `https://<api>.onrender.com/health` and `/docs` |
+| Grafana | `https://<grafana>.onrender.com/` → login → PRA dashboard |
 
-`POSTGRES_SSLMODE` / `PRA_PG_SSLMODE` default to `require` in the blueprint.
+Try on Product: `Can I refund order ZK-1001?` (Agent tools on).
 
-5. After first deploy, set GitHub **About → Homepage** to the Product URL.
-6. Keep Ops (Kestra / local Postgres `:5435` / Grafana `:3002`) off the public internet.
+### 6) After it works
 
-## Health checks
+1. GitHub repo → **About → Homepage** = Product URL (official).
+2. Streamlit Cloud URL stays **secondary** only.
+3. Do **not** put Kestra / local Ops on Render.
 
-- Product: `/_stcore/health`
-- Grafana: `/api/health`
+---
+
+## Local API (dev)
+
+```powershell
+uv sync
+uv run pra-api
+# http://localhost:8000/docs
+# POST /search {"query":"refund deadline","use_llm":false}
+```
 
 ## Notes
 
-- Free-tier sleeps; first request after idle may be slow.
-- Grafana meta-DB on Render uses SQLite (see `grafana/docker-entrypoint.sh`). Dashboard **data** still comes from Neon via `PRA_PG_*`.
-- Local Compose is unchanged: Streamlit `:8502`, Grafana Ops `:3002`.
+- Free-tier sleeps; cold start is normal.
+- Grafana meta-DB on Render uses SQLite; dashboard **data** is Neon via `PRA_PG_*`.
+- Local Compose Ops unchanged: Streamlit `:8502`, Grafana `:3002`.
