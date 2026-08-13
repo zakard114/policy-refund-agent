@@ -105,7 +105,7 @@ def integrate_docs() -> HTMLResponse:
     return get_swagger_ui_html(
         openapi_url=app.openapi_url or "/openapi.json",
         title="Integrate · Policy & Refund Support Agent",
-        swagger_css_url="/static/swagger-dark.css?v=1",
+        swagger_css_url="/static/swagger-dark.css?v=2",
         swagger_ui_parameters={
             "persistAuthorization": True,
             "displayRequestDuration": True,

@@ -197,3 +197,92 @@ body {
 .swagger-ui .dialog-ux .modal-ux-content p {
   color: #e8edf5 !important;
 }
+
+/* Schemas — kill default white panels / glare */
+.swagger-ui section.models,
+.swagger-ui section.models.is-open,
+.swagger-ui section.models .models-control,
+.swagger-ui .model-container,
+.swagger-ui .model-box,
+.swagger-ui .model-box-control,
+.swagger-ui span.model,
+.swagger-ui .model-box .model,
+.swagger-ui .json-schema-2020-12,
+.swagger-ui .json-schema-2020-12-accordion,
+.swagger-ui .json-schema-2020-12-expand-deep-button,
+.swagger-ui .json-schema-2020-12__title {
+  background: #151c24 !important;
+  background-color: #151c24 !important;
+  color: #e8edf5 !important;
+  border-color: #243040 !important;
+  box-shadow: none !important;
+}
+
+.swagger-ui section.models {
+  border: 1px solid rgba(0, 209, 193, 0.22) !important;
+  border-radius: 12px !important;
+  padding: 4px 8px 12px !important;
+}
+
+.swagger-ui section.models h4,
+.swagger-ui section.models h4 span,
+.swagger-ui section.models .models-control,
+.swagger-ui .model-title,
+.swagger-ui .model-title__text,
+.swagger-ui .model .property.primitive,
+.swagger-ui .prop-name,
+.swagger-ui .prop-type,
+.swagger-ui .prop-format,
+.swagger-ui .model .property,
+.swagger-ui .parameter__type,
+.swagger-ui .brace-open,
+.swagger-ui .brace-close,
+.swagger-ui .punctuation,
+.swagger-ui .inner-object {
+  color: #e8edf5 !important;
+}
+
+.swagger-ui .model-box {
+  background: #121820 !important;
+  border: 1px solid #243040 !important;
+  border-radius: 10px !important;
+  margin: 6px 0 !important;
+}
+
+.swagger-ui .model-box-control:focus,
+.swagger-ui .models-control:focus {
+  outline: 1px solid #00d1c1 !important;
+}
+
+.swagger-ui .model-toggle,
+.swagger-ui .model-toggle::after {
+  background: transparent !important;
+  filter: invert(0.85);
+}
+
+.swagger-ui table.model tbody tr td,
+.swagger-ui table.model,
+.swagger-ui .model-box table {
+  background: transparent !important;
+  border-color: #243040 !important;
+  color: #c9d4e3 !important;
+}
+
+.swagger-ui .property-row,
+.swagger-ui .property-row .star {
+  background: transparent !important;
+  color: #c9d4e3 !important;
+}
+
+.swagger-ui .model .renderedMarkdown p,
+.swagger-ui .model-box .markdown p {
+  color: #8b97a8 !important;
+}
+
+.swagger-ui .json-schema-2020-12-body,
+.swagger-ui .json-schema-2020-12-head,
+.swagger-ui .json-schema-2020-12 .property-row {
+  background: #121820 !important;
+  color: #e8edf5 !important;
+  border-color: #243040 !important;
+}
