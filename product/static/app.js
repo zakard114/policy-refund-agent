@@ -177,6 +177,8 @@
   function ask(question) {
     const q = (question || "").trim();
     if (!q) return;
+    const welcome = document.getElementById("welcome");
+    if (welcome) welcome.remove();
     addMessage("user", q);
     input.value = "";
     setBusy(true);

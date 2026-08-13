@@ -4,7 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zakard Shop · Policy Support</title>
-<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/styles.css?v=2">
+<style>
+  /* Critical paint — visible even if /static is slow/cached */
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    color: #1a2332;
+    background: linear-gradient(165deg, #c5d9ee 0%, #e8f0f8 38%, #b8cfe6 100%) !important;
+  }
+</style>
 </head>
 <body>
   <header class="top">
@@ -21,29 +31,39 @@
     </nav>
   </header>
 
-  <section class="hero">
-    <h1>Refund answers grounded in policy</h1>
-    <p>Order-aware tools, citations, and safe abstain when the policy doesn’t cover it.</p>
-    <div class="chips" id="chips" aria-label="30-second demos">
-      <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
-      <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
-      <button type="button" data-q="주문 ZK-1001 환불할 수 있나요?">한국어 · ZK-1001</button>
-    </div>
-  </section>
+  <div class="shell">
+    <section class="hero">
+      <h1>Refund answers grounded in policy</h1>
+      <p>Order-aware tools, citations, and safe abstain when the policy doesn’t cover it.</p>
+      <div class="chips" id="chips" aria-label="30-second demos">
+        <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
+        <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
+        <button type="button" data-q="주문 ZK-1001 환불할 수 있나요?">한국어 · ZK-1001</button>
+      </div>
+    </section>
 
-  <main id="messages" aria-live="polite"></main>
+    <section class="panel">
+      <main id="messages" aria-live="polite">
+        <div class="msg assistant welcome" id="welcome">
+          <div class="bubble">
+            Hi — I’m Zakard Shop policy support. Try a chip above, or ask about refunds, returns, or order <b>ZK-1001</b>.
+          </div>
+        </div>
+      </main>
 
-  <form id="chat-form" autocomplete="off">
-    <label class="toggle">
-      <input type="checkbox" id="use-tools" checked>
-      Agent tools
-    </label>
-    <input id="question-input" type="text" placeholder="Ask about refunds, returns, or order ZK-1001…" autofocus>
-    <button id="send-btn" type="submit">Ask</button>
-  </form>
+      <form id="chat-form" autocomplete="off">
+        <label class="toggle">
+          <input type="checkbox" id="use-tools" checked>
+          Agent tools
+        </label>
+        <input id="question-input" type="text" placeholder="Ask about refunds, returns, or order ZK-1001…" autofocus>
+        <button id="send-btn" type="submit">Ask</button>
+      </form>
+    </section>
+  </div>
 
   <p class="foot">Official Render Product · Streamlit Cloud is secondary · Answers use hybrid RAG</p>
 
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=2"></script>
 </body>
 </html>
