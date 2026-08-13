@@ -198,7 +198,7 @@ body {
   color: #e8edf5 !important;
 }
 
-/* Schemas — kill default white panels / glare */
+/* Schemas — brighter panels + high-contrast text */
 .swagger-ui section.models,
 .swagger-ui section.models.is-open,
 .swagger-ui section.models .models-control,
@@ -210,18 +210,21 @@ body {
 .swagger-ui .json-schema-2020-12,
 .swagger-ui .json-schema-2020-12-accordion,
 .swagger-ui .json-schema-2020-12-expand-deep-button,
-.swagger-ui .json-schema-2020-12__title {
-  background: #151c24 !important;
-  background-color: #151c24 !important;
-  color: #e8edf5 !important;
-  border-color: #243040 !important;
+.swagger-ui .json-schema-2020-12__title,
+.swagger-ui .json-schema-2020-12-body,
+.swagger-ui .json-schema-2020-12-head {
+  background: #1e2836 !important;
+  background-color: #1e2836 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
   box-shadow: none !important;
 }
 
 .swagger-ui section.models {
-  border: 1px solid rgba(0, 209, 193, 0.22) !important;
+  border: 1px solid rgba(0, 209, 193, 0.28) !important;
   border-radius: 12px !important;
   padding: 4px 8px 12px !important;
+  background: #1a2330 !important;
 }
 
 .swagger-ui section.models h4,
@@ -238,13 +241,31 @@ body {
 .swagger-ui .brace-open,
 .swagger-ui .brace-close,
 .swagger-ui .punctuation,
-.swagger-ui .inner-object {
-  color: #e8edf5 !important;
+.swagger-ui .inner-object,
+.swagger-ui .model .property.primitive .prop-type,
+.swagger-ui .model-box .model-box,
+.swagger-ui span[class*="json-schema"],
+.swagger-ui .json-schema-2020-12-keyword,
+.swagger-ui .json-schema-2020-12-keyword__name,
+.swagger-ui .json-schema-2020-12-keyword__value,
+.swagger-ui .json-schema-2020-12__title,
+.swagger-ui .json-schema-2020-12-expand-deep-button,
+.swagger-ui .json-schema-2020-12-accordion,
+.swagger-ui .json-schema-2020-12 .property-row,
+.swagger-ui .json-schema-2020-12 .property-row * {
+  color: #f1f5f9 !important;
+}
+
+.swagger-ui .prop-type,
+.swagger-ui .parameter__type,
+.swagger-ui .prop-format,
+.swagger-ui .model .property .prop-type {
+  color: #5eead4 !important;
 }
 
 .swagger-ui .model-box {
-  background: #121820 !important;
-  border: 1px solid #243040 !important;
+  background: #243041 !important;
+  border: 1px solid #3d4f66 !important;
   border-radius: 10px !important;
   margin: 6px 0 !important;
 }
@@ -257,32 +278,46 @@ body {
 .swagger-ui .model-toggle,
 .swagger-ui .model-toggle::after {
   background: transparent !important;
-  filter: invert(0.85);
+  filter: invert(0.92) brightness(1.15);
 }
 
 .swagger-ui table.model tbody tr td,
 .swagger-ui table.model,
 .swagger-ui .model-box table {
   background: transparent !important;
-  border-color: #243040 !important;
-  color: #c9d4e3 !important;
+  border-color: #3d4f66 !important;
+  color: #e2e8f0 !important;
 }
 
 .swagger-ui .property-row,
-.swagger-ui .property-row .star {
+.swagger-ui .property-row .star,
+.swagger-ui .property-row td,
+.swagger-ui .property-row th {
   background: transparent !important;
-  color: #c9d4e3 !important;
+  color: #e2e8f0 !important;
 }
 
 .swagger-ui .model .renderedMarkdown p,
-.swagger-ui .model-box .markdown p {
-  color: #8b97a8 !important;
+.swagger-ui .model-box .markdown p,
+.swagger-ui .model .renderedMarkdown,
+.swagger-ui .json-schema-2020-12-description,
+.swagger-ui .json-schema-2020-12-description * {
+  color: #cbd5e1 !important;
 }
 
 .swagger-ui .json-schema-2020-12-body,
 .swagger-ui .json-schema-2020-12-head,
 .swagger-ui .json-schema-2020-12 .property-row {
-  background: #121820 !important;
-  color: #e8edf5 !important;
-  border-color: #243040 !important;
+  background: #243041 !important;
+  color: #f1f5f9 !important;
+  border-color: #3d4f66 !important;
+}
+
+/* Enum / anyOf chips often inherit near-black from default theme */
+.swagger-ui .model-box .prop .prop,
+.swagger-ui .model .property .prop,
+.swagger-ui section.models code,
+.swagger-ui .model code {
+  color: #f8fafc !important;
+  background: #0f172a !important;
 }
