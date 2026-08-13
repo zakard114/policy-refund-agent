@@ -6,8 +6,11 @@
 
 Built as a capstone project for [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp).
 
-**Live demo:** https://policy-refund-agent.streamlit.app/  
+**Live (official — Render):** _URL after Blueprint deploy_ — see [`docs/RENDER.md`](docs/RENDER.md)  
+**Live (secondary — Streamlit Cloud):** https://policy-refund-agent.streamlit.app/  
 Try: `Can I refund order ZK-1001?` (eligible) · sidebar **Agent tools** on.
+
+Hub (planned): **Product · Insights · Integrate · GitHub** · Ops locked (local only).
 
 ---
 
@@ -35,7 +38,8 @@ Support teams need answers **strictly from policy documents** and consistent ref
 
 ## Status
 
-**Capstone-ready** — RAG + hybrid RRF + Streamlit (local Docker **and** [Streamlit Community Cloud](#cloud-deployment)) + agent tools + safety guards + Kestra ingestion + Grafana monitoring. See [Evaluation criteria](#evaluation-criteria) for rubric mapping.
+**Capstone-ready** — RAG + hybrid RRF + agent tools + safety + Kestra + Grafana.  
+**Public deploy:** **Render = official** Product / Insights ([`docs/RENDER.md`](docs/RENDER.md), [`render.yaml`](render.yaml)). **Streamlit Community Cloud = secondary** prototype ([Cloud deployment](#cloud-deployment)). See [Evaluation criteria](#evaluation-criteria).
 
 ### Paths (read this first)
 
@@ -182,8 +186,9 @@ flowchart TD
 
 - **Hybrid RRF over keyword-only:** keyword is strong on this small structured policy; vector ranks help paraphrases. RRF fuses both without a learned re-ranker. Trade-off: more moving parts than pure TF-IDF.
 - **Cerebras Gemma over larger hosted models:** Zoomcamp-friendly cost/latency; Cloud secrets use the same OpenAI-compatible client. Trade-off: tool-calling quirks → deterministic tool fallback in [`app/agent.py`](app/agent.py).
-- **Streamlit over Flask/FastAPI UI:** matches the course interface criterion and deploys cleanly to Community Cloud. Trade-off: less flexible as a pure JSON API.
-- **Neon (optional) for Cloud logging:** local Compose keeps Postgres on `:5435`; Cloud 👍 needs a reachable DB → free Neon + `POSTGRES_SSLMODE=require`. Grafana can point at the same DB via `PRA_PG_*`.
+- **Render as official public face:** Product + Insights on Render; Streamlit Cloud kept as a secondary prototype. Trade-off: Blueprint + Docker images instead of one-click Streamlit-only.
+- **Streamlit UI (interim Product):** course-friendly chat; FastAPI Product / Integrate API land in post-grading polish. Trade-off: less flexible as a pure JSON API until Phase 1.
+- **Neon for Cloud logging:** local Compose keeps Postgres on `:5435`; public 👍 needs a reachable DB → Neon + `POSTGRES_SSLMODE=require`. Grafana Insights uses the same DB via `PRA_PG_*`.
 - **Mock orders for tools:** `data/mock_orders.json` demos eligibility without a real OMS. Trade-off: not production order data.
 - **In-memory TF-IDF vector ranks on Cloud:** pgvector is optional; Cloud still runs hybrid RRF without a vector DB volume.
 
@@ -282,7 +287,7 @@ Rows marked **capstone extra** are **implemented** features that are not fixed-s
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
 | **Agent / tools** (capstone extra) | optional bonus (max +3, reviewer decides) | Not a fixed rubric row — candidate for the official discretionary extra points. Implemented: [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py); Cloud demo `ZK-1001` |
 | **Safety** (capstone extra) | optional bonus (max +3, reviewer decides) | Same optional pool as above (implemented, not unfinished). [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; demo [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
-| **Bonus: cloud deployment** | +2 | Live app https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Cloud](#cloud-streamlit-community-cloud) |
+| **Bonus: cloud deployment** | +2 | Official: Render ([`docs/RENDER.md`](docs/RENDER.md)); secondary: https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Cloud](#cloud-streamlit-community-cloud) |
 
 ### Quick verification commands
 
@@ -301,12 +306,20 @@ docker compose up -d postgres grafana streamlit              # full stack
 
 ## Cloud deployment
 
-Public demo on **Streamlit Community Cloud** (bonus criterion).  
+### Official: Render (Product + Insights)
+
+Primary public face. Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.md).
+
+After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` stays **Ops**.
+
+### Secondary: Streamlit Community Cloud
+
+Prototype / bonus evidence only — not the official product URL.  
 Screenshots: [Screenshots → Cloud](#cloud-streamlit-community-cloud).
 
-**Live app:** https://policy-refund-agent.streamlit.app/
+**Secondary live:** https://policy-refund-agent.streamlit.app/
 
-How to redeploy:
+How to redeploy (secondary):
 
 1. Push this repo to GitHub (`https://github.com/zakard114/policy-refund-agent`).
 2. Open [share.streamlit.io](https://share.streamlit.io/) → **New app**.

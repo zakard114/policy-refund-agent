@@ -23,9 +23,7 @@ COPY streamlit_app.py ./
 RUN pip install --upgrade pip \
     && pip install . "numpy>=1.26"
 
+# Render injects PORT; local Compose uses 8502.
 EXPOSE 8502
 
-CMD ["python", "-m", "streamlit", "run", "streamlit_app.py", \
-     "--server.headless", "true", \
-     "--server.address", "0.0.0.0", \
-     "--server.port", "8502"]
+CMD ["sh", "-c", "exec python -m streamlit run streamlit_app.py --server.headless true --server.address 0.0.0.0 --server.port ${PORT:-8502}"]

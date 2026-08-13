@@ -1,0 +1,79 @@
+# Render Blueprint — Policy & Refund Support Agent
+# Official public face: Product + Insights on Render.
+# Streamlit Community Cloud remains a secondary prototype (see README).
+#
+# Deploy: Render Dashboard → New → Blueprint → this repo.
+# Set sync:false secrets in the Dashboard (never commit real values).
+#
+# Phase 0: Streamlit Product interim. Phase 1+ replaces/adds FastAPI Product.
+
+services:
+  # --- Product (interim Streamlit; FastAPI UI lands in polish Phase 1–2) ---
+  - type: web
+    runtime: docker
+    name: policy-refund-agent
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: PORT
+        value: "8502"
+      - key: PRA_LLM_BACKEND
+        value: cerebras
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: CEREBRAS_BASE_URL
+        value: https://api.cerebras.ai/v1
+      - key: CEREBRAS_MODEL
+        value: gemma-4-31b
+      - key: PRA_RETRIEVAL_METHOD
+        value: hybrid
+      # Neon conversation_logs (thumbs / monitoring source of truth)
+      - key: POSTGRES_HOST
+        sync: false
+      - key: POSTGRES_PORT
+        value: "5432"
+      - key: POSTGRES_DB
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: POSTGRES_SSLMODE
+        value: require
+
+  # --- Insights (Grafana → Neon). Local :3002 remains Ops. ---
+  - type: web
+    runtime: docker
+    name: policy-refund-agent-grafana
+    region: oregon
+    plan: free
+    dockerfilePath: ./grafana/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: GF_SECURITY_ADMIN_USER
+        value: admin
+      - key: GF_SECURITY_ADMIN_PASSWORD
+        sync: false
+      - key: GF_USERS_DEFAULT_THEME
+        value: dark
+      - key: GF_AUTH_ANONYMOUS_ENABLED
+        value: "false"
+      - key: GF_INSTALL_PLUGINS
+        value: ""
+      # Dashboard datasource = Neon (same DB as Product)
+      - key: PRA_PG_HOST
+        sync: false
+      - key: PRA_PG_USER
+        sync: false
+      - key: PRA_PG_PASSWORD
+        sync: false
+      - key: PRA_PG_DB
+        sync: false
+      - key: PRA_PG_SSLMODE
+        value: require
