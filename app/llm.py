@@ -145,6 +145,7 @@ def answer_question(
     num_results: int = 3,
     system: str | None = None,
     method: str | None = None,
+    model: str | None = None,
 ) -> ChatResult:
     """Retrieve policy sections (default: hybrid RRF), then answer from that context."""
     from app.query import prepare_search_query
@@ -155,11 +156,13 @@ def answer_question(
         should_force_safe_fallback,
     )
 
+    model_name = model or get_model_name()
+
     if is_prompt_injection(question):
         lang = "Korean" if re.search(r"[\uac00-\ud7a3]", question or "") else "English"
         result = ChatResult(
             answer=safe_fallback_message(lang),
-            model=get_model_name(),
+            model=model_name,
             language=lang,
             search_query="(blocked:injection)",
             retrieval_method="safety-block",
@@ -181,7 +184,7 @@ def answer_question(
         f"Customer question ({prepared.language}): {prepared.original}\n"
         f"Answer in {prepared.language}."
     )
-    result = chat(system=system or SUPPORT_SYSTEM_PROMPT, user=user)
+    result = chat(system=system or SUPPORT_SYSTEM_PROMPT, user=user, model=model_name)
     result.language = prepared.language
     result.search_query = prepared.search_query
     result.retrieval_method = used_method

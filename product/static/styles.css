@@ -107,8 +107,10 @@ body {
   color: var(--muted);
   margin-bottom: 4px;
 }
-.rail code {
+.rail code,
+.rail select {
   display: block;
+  width: 100%;
   font-size: 0.78rem;
   padding: 8px 10px;
   border-radius: 8px;
@@ -117,6 +119,84 @@ body {
   color: #bfdbfe;
   word-break: break-all;
 }
+.rail select {
+  word-break: normal;
+  cursor: pointer;
+  outline: none;
+}
+.rail select:focus { border-color: var(--cobalt-bright); }
+
+.hub .ops,
+.hub button.ops {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.84rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.hub button.ops:hover {
+  color: #93c5fd;
+  background: var(--cobalt-soft);
+}
+
+.rail-btn.primary {
+  background: var(--cobalt);
+  border-color: var(--cobalt);
+  color: #fff;
+}
+.rail-btn.primary:hover {
+  background: var(--cobalt-bright);
+  border-color: var(--cobalt-bright);
+  color: #fff;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 18, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  padding: 16px;
+}
+.modal[hidden] { display: none !important; }
+.modal-card {
+  width: min(440px, 100%);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+}
+.modal-card h3 { margin: 0 0 8px; font-size: 1rem; }
+.modal-copy { margin: 0 0 12px; color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
+.modal-card input[type=password] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.modal-error { color: #fca5a5; font-size: 0.8rem; margin: 0 0 8px; }
+.modal-result {
+  margin: 0 0 12px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #bfdbfe;
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  max-height: 220px;
+  overflow: auto;
+}
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .rail-toggle {
   display: flex;
   align-items: center;

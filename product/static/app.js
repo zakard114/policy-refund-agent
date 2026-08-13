@@ -6,15 +6,37 @@
   const toolsToggle = document.getElementById("use-tools");
   const chips = document.getElementById("chips");
   const clearBtn = document.getElementById("clear-chat");
-  const modelBadge = document.getElementById("model-badge");
-  const retrievalBadge = document.getElementById("retrieval-badge");
+  const modelSelect = document.getElementById("model-select");
+  const retrievalSelect = document.getElementById("retrieval-select");
+  const opsBtn = document.getElementById("ops-btn");
+  const opsModal = document.getElementById("ops-modal");
+  const opsPassword = document.getElementById("ops-password");
+  const opsError = document.getElementById("ops-error");
+  const opsResult = document.getElementById("ops-result");
+  const opsCancel = document.getElementById("ops-cancel");
+  const opsSubmit = document.getElementById("ops-submit");
   let typingEl = null;
   let cfg = {
     insights_url: "",
     github_url: "https://github.com/zakard114/policy-refund-agent",
     model: "",
+    models: [],
     retrieval: "hybrid",
+    retrieval_options: ["hybrid", "keyword", "vector"],
+    ops_configured: false,
   };
+
+  function fillSelect(el, values, selected) {
+    if (!el) return;
+    el.innerHTML = "";
+    (values || []).forEach(function (v) {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      if (v === selected) opt.selected = true;
+      el.appendChild(opt);
+    });
+  }
 
   fetch("/config")
     .then((r) => r.json())
@@ -24,11 +46,11 @@
       if (insights && cfg.insights_url) insights.href = cfg.insights_url;
       const gh = document.getElementById("link-github");
       if (gh && cfg.github_url) gh.href = cfg.github_url;
-      if (modelBadge) modelBadge.textContent = cfg.model || "unknown";
-      if (retrievalBadge) retrievalBadge.textContent = cfg.retrieval || "hybrid";
+      fillSelect(modelSelect, cfg.models && cfg.models.length ? cfg.models : [cfg.model || "unknown"], cfg.model);
+      fillSelect(retrievalSelect, cfg.retrieval_options || ["hybrid", "keyword", "vector"], cfg.retrieval || "hybrid");
     })
     .catch(function () {
-      if (modelBadge) modelBadge.textContent = "unavailable";
+      fillSelect(modelSelect, ["unavailable"], "unavailable");
     });
 
   function scrollToBottom() {
@@ -170,7 +192,6 @@
       hint.textContent = bits.join(" · ");
       wrap.appendChild(hint);
     }
-    if (data.model && modelBadge) modelBadge.textContent = data.model;
     addFeedback(wrap, data.log_id);
   }
 
@@ -178,6 +199,8 @@
     input.disabled = busy;
     sendBtn.disabled = busy;
     toolsToggle.disabled = busy;
+    if (modelSelect) modelSelect.disabled = busy;
+    if (retrievalSelect) retrievalSelect.disabled = busy;
     chips.querySelectorAll("button").forEach(function (b) {
       b.disabled = busy;
     });
@@ -204,6 +227,8 @@
         num_results: 3,
         use_llm: true,
         use_tools: !!toolsToggle.checked,
+        method: retrievalSelect ? retrievalSelect.value : "hybrid",
+        model: modelSelect ? modelSelect.value : undefined,
       }),
     })
       .then(function (resp) {
@@ -253,6 +278,76 @@
         "Chat cleared. Try a chip above, or ask about refunds / order <b>ZK-1001</b>.";
       wrap.appendChild(bubble);
       messagesEl.appendChild(wrap);
+    });
+  }
+
+  function openOps() {
+    if (!opsModal) return;
+    opsError.hidden = true;
+    opsResult.hidden = true;
+    opsResult.textContent = "";
+    opsPassword.value = "";
+    opsModal.hidden = false;
+    opsPassword.focus();
+  }
+
+  function closeOps() {
+    if (opsModal) opsModal.hidden = true;
+  }
+
+  if (opsBtn) opsBtn.addEventListener("click", openOps);
+  if (opsCancel) opsCancel.addEventListener("click", closeOps);
+  if (opsModal) {
+    opsModal.addEventListener("click", function (e) {
+      if (e.target === opsModal) closeOps();
+    });
+  }
+  if (opsSubmit) {
+    opsSubmit.addEventListener("click", function () {
+      opsError.hidden = true;
+      if (!cfg.ops_configured) {
+        opsError.textContent = "Ops password not configured on this deploy (PRA_OPS_PASSWORD).";
+        opsError.hidden = false;
+        return;
+      }
+      opsSubmit.disabled = true;
+      fetch("/ops/unlock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: opsPassword.value || "" }),
+      })
+        .then(function (resp) {
+          return resp.json().then(function (data) {
+            return { ok: resp.ok, data: data };
+          });
+        })
+        .then(function (res) {
+          if (!res.ok) {
+            opsError.textContent =
+              (res.data && res.data.detail) || "Unlock failed";
+            opsError.hidden = false;
+            return;
+          }
+          const local = res.data.local || {};
+          opsResult.textContent = [
+            res.data.note,
+            "",
+            "Grafana Ops: " + (local.grafana_ops || ""),
+            "Postgres:     " + (local.postgres || ""),
+            "Kestra:       " + (local.kestra || ""),
+            "Compose:      " + (local.compose || ""),
+            "",
+            res.data.insights_admin || "",
+          ].join("\n");
+          opsResult.hidden = false;
+        })
+        .catch(function () {
+          opsError.textContent = "Network error";
+          opsError.hidden = false;
+        })
+        .finally(function () {
+          opsSubmit.disabled = false;
+        });
     });
   }
 })();

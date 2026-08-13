@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Zakard Shop · Policy Support</title>
-<link rel="stylesheet" href="/static/styles.css?v=3">
+<link rel="stylesheet" href="/static/styles.css?v=4">
 <style>
   html, body {
     margin: 0;
@@ -26,7 +26,7 @@
       <a id="link-insights" href="#" target="_blank" rel="noopener">Insights</a>
       <a href="/docs" target="_blank" rel="noopener">Integrate</a>
       <a id="link-github" href="https://github.com/zakard114/policy-refund-agent" target="_blank" rel="noopener">GitHub</a>
-      <span class="ops" title="Kestra / local Postgres — not public">Ops 🔒</span>
+      <button type="button" class="ops" id="ops-btn" title="Local Ops (password)">Ops 🔒</button>
     </nav>
   </header>
 
@@ -34,25 +34,29 @@
     <aside class="rail" aria-label="Settings">
       <h2>Settings</h2>
       <div class="rail-block">
-        <div class="rail-label">Model</div>
-        <code id="model-badge">…</code>
+        <label class="rail-label" for="model-select">Model</label>
+        <select id="model-select"></select>
       </div>
       <div class="rail-block">
-        <div class="rail-label">Retrieval</div>
-        <code id="retrieval-badge">hybrid</code>
+        <label class="rail-label" for="retrieval-select">Retrieval</label>
+        <select id="retrieval-select">
+          <option value="hybrid">hybrid</option>
+          <option value="keyword">keyword</option>
+          <option value="vector">vector</option>
+        </select>
       </div>
       <label class="rail-toggle">
         <input type="checkbox" id="use-tools" checked>
         <span>Agent tools</span>
       </label>
-      <p class="rail-help">lookup_order · evaluate_refund · search_policy. Demo: ZK-1001…</p>
+      <p class="rail-help">Whitelist models only. Demo orders: ZK-1001…</p>
       <button type="button" id="clear-chat" class="rail-btn">Clear chat</button>
     </aside>
 
     <div class="maincol">
       <section class="hero">
         <h1>Refund answers grounded in policy</h1>
-        <p>Official Render Product. Streamlit Cloud is secondary.</p>
+        <p>Order-aware tools, citations, and safe abstain when context is missing.</p>
         <div class="chips" id="chips" aria-label="30-second demos">
           <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
           <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
@@ -77,8 +81,25 @@
     </div>
   </div>
 
-  <p class="foot">Product · Insights · Integrate on Render · Ops locked</p>
+  <p class="foot">
+    Official experience on Render (Product · Insights · Integrate).
+    Streamlit Community Cloud is a secondary prototype.
+  </p>
 
-<script src="/static/app.js?v=3"></script>
+  <div id="ops-modal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="ops-title">
+      <h3 id="ops-title">Ops (local only)</h3>
+      <p class="modal-copy">Enter the shared Ops password. Public deploys never expose Kestra or local Postgres.</p>
+      <input id="ops-password" type="password" placeholder="Ops password" autocomplete="current-password">
+      <p id="ops-error" class="modal-error" hidden></p>
+      <pre id="ops-result" class="modal-result" hidden></pre>
+      <div class="modal-actions">
+        <button type="button" id="ops-cancel" class="rail-btn">Close</button>
+        <button type="button" id="ops-submit" class="rail-btn primary">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+<script src="/static/app.js?v=4"></script>
 </body>
 </html>

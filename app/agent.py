@@ -119,9 +119,14 @@ def _assistant_tool_message(msg: Any) -> dict[str, Any]:
     }
 
 
-def _run_tool_loop(question: str, *, max_rounds: int = 6) -> ChatResult:
+def _run_tool_loop(
+    question: str,
+    *,
+    max_rounds: int = 6,
+    model: str | None = None,
+) -> ChatResult:
     client = get_llm_client()
-    model_name = get_model()
+    model_name = model or get_model()
     prepared = prepare_search_query(question)
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": AGENT_SYSTEM_PROMPT},
@@ -259,12 +264,17 @@ def _fallback_with_tools(question: str) -> ChatResult:
     return result
 
 
-def answer_with_agent(question: str, *, num_results: int = 3) -> ChatResult:
+def answer_with_agent(
+    question: str,
+    *,
+    num_results: int = 3,
+    model: str | None = None,
+) -> ChatResult:
     """Answer via tools when supported; otherwise deterministic tool + chat fallback.
 
     ``num_results`` is accepted for Streamlit API parity (used by search_policy default).
     """
-    from app.llm import get_model_name
+    from app.llm import _maybe_log, get_model_name
     from app.safety import (
         is_prompt_injection,
         looks_like_safe_refusal,
@@ -273,45 +283,35 @@ def answer_with_agent(question: str, *, num_results: int = 3) -> ChatResult:
     )
 
     _ = num_results  # schemas default; agent chooses via tool args
+    model_name = model or get_model_name()
 
     if is_prompt_injection(question):
         lang = "Korean" if re.search(r"[\uac00-\ud7a3]", question or "") else "English"
         result = ChatResult(
             answer=safe_fallback_message(lang),
-            model=get_model_name(),
+            model=model_name,
             language=lang,
             search_query="(blocked:injection)",
             retrieval_method="safety-block",
             citations=[],
         )
-    else:
-        try:
-            result = _run_tool_loop(question)
-        except Exception as exc:  # noqa: BLE001 — some hosts reject OpenAI tools
-            msg = str(exc).lower()
-            if any(s in msg for s in ("401", "auth", "api key", "incorrect api key")):
-                raise
-            # Cerebras/Gemma may return 400 on tools — deterministic tool + one chat turn.
-            result = _fallback_with_tools(question)
-
-        if should_force_safe_fallback(question, result.answer) and not looks_like_safe_refusal(
-            result.answer
-        ):
-            result.answer = safe_fallback_message(result.language or "English")
-            result.retrieval_method = f"{result.retrieval_method}+safety-fallback"
-            result.citations = []
-            result.search_query = (result.search_query or "") + ",safety-fallback"
+        return _maybe_log(result, question)
 
     try:
-        from app.database import log_conversation
+        result = _run_tool_loop(question, model=model_name)
+    except Exception as exc:  # noqa: BLE001 — some hosts reject OpenAI tools
+        msg = str(exc).lower()
+        if any(s in msg for s in ("401", "auth", "api key", "incorrect api key")):
+            raise
+        # Cerebras/Gemma may return 400 on tools — deterministic tool + one chat turn.
+        result = _fallback_with_tools(question)
 
-        result.log_id = log_conversation(
-            user_question=question,
-            agent_answer=result.answer,
-            latency_ms=int(result.elapsed_time * 1000),
-            used_citations=result.citations,
-            background=False,
-        )
-    except Exception:  # noqa: BLE001
-        result.log_id = None
-    return result
+    if should_force_safe_fallback(question, result.answer) and not looks_like_safe_refusal(
+        result.answer
+    ):
+        result.answer = safe_fallback_message(result.language or "English")
+        result.retrieval_method = f"{result.retrieval_method}+safety-fallback"
+        result.citations = []
+        result.search_query = (result.search_query or "") + ",safety-fallback"
+
+    return _maybe_log(result, question)

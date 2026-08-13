@@ -42,8 +42,10 @@ services:
         sync: false
       - key: POSTGRES_SSLMODE
         value: require
-
-  # --- Integrate API (same image; dedicated /docs URL) ---
+      - key: PRA_OPS_PASSWORD
+        sync: false
+      - key: PRA_ALLOWED_MODELS
+        value: gemma-4-31b,llama3.1-8b,qwen-3-32b
   - type: web
     runtime: docker
     name: policy-refund-agent-api
