@@ -420,14 +420,17 @@ body {
   letter-spacing: -0.04em;
   line-height: 1.2;
 }
-.hero-accent { color: var(--teal); }
+.hero-accent {
+  color: #7dd3c7;
+  font-weight: 600;
+}
 .hero-rule {
   width: 48px;
   height: 2px;
   border-radius: 999px;
-  background: var(--teal);
+  background: rgba(125, 211, 199, 0.75);
   margin: 0 0 12px;
-  box-shadow: 0 0 12px var(--teal-glow);
+  box-shadow: none;
 }
 .hero p {
   margin: 0 0 14px;
