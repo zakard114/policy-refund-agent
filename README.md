@@ -6,9 +6,11 @@
 
 Built as a capstone project for [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp).
 
-**Live (official — Render):** _URL after Blueprint deploy_ — see [`docs/RENDER.md`](docs/RENDER.md)  
+**Live (official — Render Product):** https://policy-refund-agent.onrender.com  
+**Integrate API:** https://policy-refund-agent-api.onrender.com/docs · also `/docs` on Product  
+**Insights (Grafana):** https://policy-refund-agent-grafana.onrender.com  
 **Live (secondary — Streamlit Cloud):** https://policy-refund-agent.streamlit.app/  
-Try: `Can I refund order ZK-1001?` (eligible) · sidebar **Agent tools** on.
+Try chips: ZK-1001 · Non-refundable · 한국어 · or ask freely (Agent tools on).
 
 Hub (planned): **Product · Insights · Integrate · GitHub** · Ops locked (local only).
 

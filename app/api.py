@@ -1,10 +1,15 @@
-"""FastAPI Integrate surface: /health, /search, /answer, /docs."""
+"""FastAPI Product + Integrate: UI, /health, /search, /answer, /feedback, /docs."""
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.config import load_app_env, retrieval_method
@@ -13,14 +18,28 @@ from app.query import prepare_search_query
 
 load_app_env()
 
+ROOT = Path(__file__).resolve().parents[1]
+PRODUCT_DIR = ROOT / "product"
+STATIC_DIR = PRODUCT_DIR / "static"
+
 app = FastAPI(
-    title="Policy & Refund Support Agent API",
+    title="Policy & Refund Support Agent",
     description=(
-        "Integrate API for Zakard Shop policy RAG — hybrid search and "
-        "grounded answers. Official Product UI is separate; this is the JSON surface."
+        "Zakard Shop policy RAG — Product UI + Integrate API "
+        "(hybrid search, grounded answers, optional agent tools)."
     ),
-    version="0.1.0",
+    version="0.2.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("PRA_CORS_ORIGINS", "*").split(","),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+if STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 class SearchRequest(BaseModel):
@@ -45,6 +64,12 @@ class AnswerRequest(BaseModel):
     )
 
 
+class FeedbackRequest(BaseModel):
+    log_id: int
+    feedback: int = Field(..., description="+1 helpful or -1 not helpful")
+    comment: str | None = None
+
+
 def _serialize_hit(doc: dict[str, Any], method: str) -> dict[str, Any]:
     out: dict[str, Any] = {
         "id": doc.get("id", ""),
@@ -59,9 +84,32 @@ def _serialize_hit(doc: dict[str, Any], method: str) -> dict[str, Any]:
     return out
 
 
+@app.get("/")
+def product_home() -> FileResponse:
+    index = PRODUCT_DIR / "index.html"
+    if not index.is_file():
+        raise HTTPException(status_code=404, detail="Product UI not packaged")
+    return FileResponse(index)
+
+
+@app.get("/config")
+def product_config() -> dict[str, str]:
+    return {
+        "insights_url": os.getenv(
+            "PRA_INSIGHTS_URL",
+            "https://policy-refund-agent-grafana.onrender.com",
+        ),
+        "github_url": os.getenv(
+            "PRA_GITHUB_URL",
+            "https://github.com/zakard114/policy-refund-agent",
+        ),
+        "integrate_path": "/docs",
+    }
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "policy-refund-agent-api"}
+    return {"status": "ok", "service": "policy-refund-agent"}
 
 
 @app.post("/search")
@@ -127,3 +175,19 @@ def answer_endpoint(request: AnswerRequest) -> dict[str, Any]:
             "total": result.total_tokens,
         },
     }
+
+
+@app.post("/feedback")
+def feedback_endpoint(request: FeedbackRequest) -> dict[str, Any]:
+    if request.feedback not in (1, -1):
+        raise HTTPException(status_code=400, detail="feedback must be +1 or -1")
+    from app.database import save_feedback
+
+    ok = save_feedback(
+        log_id=request.log_id,
+        feedback=request.feedback,
+        comment=request.comment,
+    )
+    if not ok:
+        raise HTTPException(status_code=404, detail="log_id not found or DB unavailable")
+    return {"ok": True, "log_id": request.log_id, "feedback": request.feedback}

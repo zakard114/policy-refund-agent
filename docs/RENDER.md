@@ -23,11 +23,11 @@ Expected services (names may match exactly):
 
 | Service | Role |
 |---------|------|
-| `policy-refund-agent` | Product (Streamlit interim) |
-| `policy-refund-agent-api` | Integrate API (if present in `render.yaml` on `main`) |
+| `policy-refund-agent` | Product (FastAPI + static hub/chat) |
+| `policy-refund-agent-api` | Integrate (`/docs`, same image) |
 | `policy-refund-agent-grafana` | Insights |
 
-If API is missing on remote yet, Product + Grafana alone is enough for first bring-up.
+Product health check: `/health` (not Streamlit `/_stcore/health`).
 
 ### 2) Region (Guam)
 

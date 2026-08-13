@@ -8,18 +8,16 @@
 # Phase 0: Streamlit Product interim. Phase 1+ replaces/adds FastAPI Product.
 
 services:
-  # --- Product (interim Streamlit; FastAPI UI lands in polish Phase 1–2) ---
+  # --- Product (FastAPI + static UI; Streamlit remains secondary on Cloud) ---
   - type: web
     runtime: docker
     name: policy-refund-agent
     region: oregon
     plan: free
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.api
     dockerContext: .
-    healthCheckPath: /_stcore/health
+    healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: "8502"
       - key: PRA_LLM_BACKEND
         value: cerebras
       - key: CEREBRAS_API_KEY
@@ -30,7 +28,8 @@ services:
         value: gemma-4-31b
       - key: PRA_RETRIEVAL_METHOD
         value: hybrid
-      # Neon conversation_logs (thumbs / monitoring source of truth)
+      - key: PRA_INSIGHTS_URL
+        value: https://policy-refund-agent-grafana.onrender.com
       - key: POSTGRES_HOST
         sync: false
       - key: POSTGRES_PORT
@@ -44,7 +43,7 @@ services:
       - key: POSTGRES_SSLMODE
         value: require
 
-  # --- Integrate API (FastAPI) ---
+  # --- Integrate API (same image; dedicated /docs URL) ---
   - type: web
     runtime: docker
     name: policy-refund-agent-api
@@ -54,8 +53,6 @@ services:
     dockerContext: .
     healthCheckPath: /health
     envVars:
-      - key: PORT
-        value: "8000"
       - key: PRA_LLM_BACKEND
         value: cerebras
       - key: CEREBRAS_API_KEY
@@ -66,6 +63,8 @@ services:
         value: gemma-4-31b
       - key: PRA_RETRIEVAL_METHOD
         value: hybrid
+      - key: PRA_INSIGHTS_URL
+        value: https://policy-refund-agent-grafana.onrender.com
       - key: POSTGRES_HOST
         sync: false
       - key: POSTGRES_PORT

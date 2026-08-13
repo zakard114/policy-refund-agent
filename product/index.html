@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zakard Shop · Policy Support</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <a href="/" class="logo">Zakard Shop</a>
+      <span class="tag">Policy &amp; Refund Support</span>
+    </div>
+    <nav class="hub" aria-label="Product hub">
+      <a class="active" href="/">Product</a>
+      <a id="link-insights" href="#" target="_blank" rel="noopener">Insights</a>
+      <a href="/docs" target="_blank" rel="noopener">Integrate</a>
+      <a id="link-github" href="https://github.com/zakard114/policy-refund-agent" target="_blank" rel="noopener">GitHub</a>
+      <span class="ops" title="Kestra / local Postgres — not public">Ops 🔒</span>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Refund answers grounded in policy</h1>
+    <p>Order-aware tools, citations, and safe abstain when the policy doesn’t cover it.</p>
+    <div class="chips" id="chips" aria-label="30-second demos">
+      <button type="button" data-q="Can I refund order ZK-1001?">ZK-1001 · eligible</button>
+      <button type="button" data-q="I powered on the electronics and removed the label — can I still get a refund?">Non-refundable</button>
+      <button type="button" data-q="주문 ZK-1001 환불할 수 있나요?">한국어 · ZK-1001</button>
+    </div>
+  </section>
+
+  <main id="messages" aria-live="polite"></main>
+
+  <form id="chat-form" autocomplete="off">
+    <label class="toggle">
+      <input type="checkbox" id="use-tools" checked>
+      Agent tools
+    </label>
+    <input id="question-input" type="text" placeholder="Ask about refunds, returns, or order ZK-1001…" autofocus>
+    <button id="send-btn" type="submit">Ask</button>
+  </form>
+
+  <p class="foot">Official Render Product · Streamlit Cloud is secondary · Answers use hybrid RAG</p>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
