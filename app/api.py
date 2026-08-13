@@ -8,7 +8,8 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -29,6 +30,8 @@ app = FastAPI(
         "(hybrid search, grounded answers, optional agent tools)."
     ),
     version="0.2.0",
+    docs_url=None,
+    redoc_url=None,
 )
 
 app.add_middleware(
@@ -40,6 +43,21 @@ app.add_middleware(
 
 if STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+@app.get("/docs", include_in_schema=False)
+def integrate_docs() -> HTMLResponse:
+    """Swagger UI with Product/Grafana-matching dark theme."""
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url or "/openapi.json",
+        title="Integrate · Policy & Refund Support Agent",
+        swagger_css_url="/static/swagger-dark.css?v=1",
+        swagger_ui_parameters={
+            "persistAuthorization": True,
+            "displayRequestDuration": True,
+            "syntaxHighlight.theme": "obsidian",
+        },
+    )
 
 
 class SearchRequest(BaseModel):
