@@ -55,8 +55,8 @@
 
   function applyConfig(data) {
     cfg = Object.assign(cfg, data || {});
-    const insights = document.getElementById("link-insights");
-    if (insights && cfg.insights_url) insights.href = cfg.insights_url;
+    const insightsOpen = document.getElementById("insights-open");
+    if (insightsOpen && cfg.insights_url) insightsOpen.href = cfg.insights_url;
     const gh = document.getElementById("link-github");
     if (gh && cfg.github_url) gh.href = cfg.github_url;
     fillSelect(
@@ -69,6 +69,7 @@
       cfg.retrieval_options || ["hybrid", "keyword", "vector"],
       cfg.retrieval || "hybrid"
     );
+    if (currentView === "insights" && !loaded.insights) ensureViewLoaded("insights");
   }
 
   function bootProduct() {
@@ -110,6 +111,94 @@
   }
 
   bootProduct();
+
+  /* ---- Hub SPA: Product / Insights / Integrate slide ---- */
+  const hubNav = document.getElementById("hub-nav");
+  const brandHome = document.getElementById("brand-home");
+  const insightsFrame = document.getElementById("insights-frame");
+  const integrateFrame = document.getElementById("integrate-frame");
+  const insightsHint = document.getElementById("insights-hint");
+  let currentView = "product";
+  let currentOrder = 0;
+  let sliding = false;
+  const loaded = { product: true, insights: false, integrate: false };
+
+  function setHubActive(view) {
+    if (!hubNav) return;
+    hubNav.querySelectorAll(".hub-item[data-view]").forEach(function (el) {
+      if (el.classList.contains("external")) return;
+      el.classList.toggle("active", el.getAttribute("data-view") === view);
+    });
+  }
+
+  function ensureViewLoaded(view) {
+    if (view === "insights" && !loaded.insights) {
+      if (cfg.insights_url && insightsFrame) {
+        insightsFrame.src = cfg.insights_url;
+        loaded.insights = true;
+        if (insightsHint) insightsHint.hidden = false;
+      } else if (insightsHint) {
+        insightsHint.hidden = false;
+        insightsHint.textContent =
+          "Insights URL not configured. Set PRA_INSIGHTS_URL / GRAFANA public URL.";
+      }
+    }
+    if (view === "integrate" && !loaded.integrate && integrateFrame) {
+      integrateFrame.src = "/docs";
+      loaded.integrate = true;
+    }
+  }
+
+  function goToView(nextView, nextOrder) {
+    if (sliding || nextView === currentView) return;
+    const fromEl = document.getElementById("view-" + currentView);
+    const toEl = document.getElementById("view-" + nextView);
+    if (!fromEl || !toEl) return;
+
+    ensureViewLoaded(nextView);
+    sliding = true;
+    const forward = nextOrder > currentOrder;
+    const prep = forward ? "is-prep-right" : "is-prep-left";
+    const exit = forward ? "is-exit-left" : "is-exit-right";
+
+    toEl.classList.add(prep);
+    // Force layout so the prep transform applies before animating in.
+    void toEl.offsetWidth;
+
+    fromEl.classList.add(exit);
+    fromEl.classList.remove("is-active");
+    toEl.classList.remove(prep);
+    toEl.classList.add("is-active");
+
+    setHubActive(nextView);
+    currentView = nextView;
+    currentOrder = nextOrder;
+
+    window.setTimeout(function () {
+      fromEl.classList.remove(exit);
+      sliding = false;
+    }, 400);
+  }
+
+  if (hubNav) {
+    hubNav.addEventListener("click", function (e) {
+      const item = e.target.closest(".hub-item");
+      if (!item || item.id === "ops-btn") return;
+      if (item.classList.contains("external")) return;
+      const view = item.getAttribute("data-view");
+      if (!view) return;
+      e.preventDefault();
+      const order = parseInt(item.getAttribute("data-order") || "0", 10);
+      goToView(view, order);
+    });
+  }
+
+  if (brandHome) {
+    brandHome.addEventListener("click", function (e) {
+      e.preventDefault();
+      goToView("product", 0);
+    });
+  }
 
   function scrollToBottom() {
     messagesEl.scrollTop = messagesEl.scrollHeight;

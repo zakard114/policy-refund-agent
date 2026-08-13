@@ -17,6 +17,9 @@ export GF_CHECK_FOR_UPDATES="${GF_CHECK_FOR_UPDATES:-false}"
 export GF_AUTH_ANONYMOUS_ENABLED="${GF_AUTH_ANONYMOUS_ENABLED:-true}"
 export GF_AUTH_ANONYMOUS_ORG_ROLE="${GF_AUTH_ANONYMOUS_ORG_ROLE:-Viewer}"
 export GF_USERS_DEFAULT_THEME="${GF_USERS_DEFAULT_THEME:-dark}"
+# Allow Product hub to embed Insights in an iframe.
+export GF_SECURITY_ALLOW_EMBEDDING="${GF_SECURITY_ALLOW_EMBEDDING:-true}"
+export GF_SECURITY_COOKIE_SAMESITE="${GF_SECURITY_COOKIE_SAMESITE:-disabled}"
 
 # Allow DATABASE_URL → PRA_PG_* (optional convenience on Render).
 if [ -n "${DATABASE_URL:-}" ] && [ -z "${PRA_PG_HOST:-}" ]; then
