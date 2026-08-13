@@ -35,6 +35,5 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Cursor — track .cursor/rules/; ignore personal cache/history
-.cursor/history/
-.cursor/temp/
+# Cursor — keep local only (do not publish agent rules)
+.cursor/
