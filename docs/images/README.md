@@ -8,6 +8,12 @@ For README and portfolio use.
 |------|-------------|
 | `readme-hero-banner.png` | README top banner — Zakard Shop Policy Support |
 
+## Architecture
+
+| File | Description |
+|------|-------------|
+| `architecture/live-path-infographic-v1.png` | Public live-path infographic (Product → API → Agent/RAG → Hybrid RRF → LLM → Neon/Grafana). README Mermaid graph kept as the code-oriented view. |
+
 ## Canonical (README)
 
 ### Hybrid retrieval

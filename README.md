@@ -139,6 +139,12 @@ Compose Streamlit image must be rebuilt after code changes: `docker compose up -
 
 ## Architecture
 
+![Live path architecture — Product → API → Agent/RAG → Hybrid RRF → LLM → Neon/Grafana](docs/images/architecture/live-path-infographic-v1.png)
+
+**Live path (infographic):** User → Render Product → FastAPI Integrate → Agent tools / RAG → Hybrid RRF → Cerebras Gemma → citations + safety → Neon logs → Grafana Insights. Ops (Kestra / local Grafana) stays locked off the public face.
+
+Technical graph (same system, code-oriented):
+
 ```mermaid
 flowchart TD
     User["User"]
