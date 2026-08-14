@@ -41,7 +41,7 @@ Stable aliases (same bytes as hybrid):
 | `monitoring/grafana-before.png` | Cold start — Questions `0` / No data |
 | `monitoring/streamlit-feedback.png` | Live ask + Citations + **Feedback recorded: helpful 👍** |
 | `monitoring/grafana-after.png` | After ask — latency, citations, **Thumbs up ≥ 1** |
-| `monitoring/grafana-neon-after.png` | Optional — Grafana on Neon (Cloud thumbs / logs) |
+| `monitoring/grafana-neon-after.png` | Optional — Grafana on Neon (public thumbs / logs) |
 
 Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics update.
 
@@ -51,11 +51,11 @@ Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics u
 |------|-------------|
 | `compose/streamlit-compose-refund.png` | Compose `:8502` — refund answer + Citations + **Feedback recorded: helpful 👍** |
 
-### Cloud deployment
+### Cloud (secondary — Streamlit Community Cloud)
 
 | File | Description |
 |------|-------------|
-| `cloud/streamlit-cloud-zk1001-ui.png` | Clean UI — `ZK-1001` eligible + 👍/feedback (no manage-app log) |
+| `cloud/streamlit-cloud-zk1001-ui.png` | Secondary prototype — `ZK-1001` eligible + 👍/feedback (no manage-app log); not official Render Product |
 | `cloud/streamlit-cloud-zk1001.png` | Same answer + Cloud manage-app / install log |
 | `cloud/streamlit-cloud-zk1001-ko.png` | Korean Q&A — `language: Korean`, agent tools, citations |
 

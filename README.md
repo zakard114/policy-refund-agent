@@ -6,13 +6,13 @@
 
 Built as a capstone project for [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp).
 
-**Live (official — Render Product):** https://policy-refund-agent.onrender.com  
+**Official Product (Render):** https://policy-refund-agent.onrender.com  
 **Integrate API:** https://policy-refund-agent-api.onrender.com/docs · also `/docs` on Product  
 **Insights (Grafana):** https://policy-refund-agent-grafana.onrender.com  
-**Live (secondary — Streamlit Cloud):** https://policy-refund-agent.streamlit.app/  
+**Secondary prototype (Streamlit Cloud — may sleep):** https://policy-refund-agent.streamlit.app/  
 Try chips: ZK-1001 · Non-refundable · 한국어 · or ask freely (Agent tools on).
 
-Hub (planned): **Product · Insights · Integrate · GitHub** · Ops locked (local only).
+Hub on Product: **Product · Insights · Integrate · GitHub** · Ops locked (local only).
 
 ---
 
@@ -41,7 +41,7 @@ Support teams need answers **strictly from policy documents** and consistent ref
 ## Status
 
 **Capstone-ready** — RAG + hybrid RRF + agent tools + safety + Kestra + Grafana.  
-**Public deploy:** **Render = official** Product / Insights ([`docs/RENDER.md`](docs/RENDER.md), [`render.yaml`](render.yaml)). **Streamlit Community Cloud = secondary** prototype ([Cloud deployment](#cloud-deployment)). See [Evaluation criteria](#evaluation-criteria).
+**Public deploy:** **Render = official** Product / Insights / Integrate ([`docs/RENDER.md`](docs/RENDER.md), [`render.yaml`](render.yaml)). **Streamlit Community Cloud = secondary** prototype (may sleep) — [Cloud deployment](#cloud-deployment). See [Evaluation criteria](#evaluation-criteria).
 
 ### Paths (read this first)
 
@@ -149,7 +149,9 @@ Technical graph (same system, code-oriented):
 %%{init: {"theme":"base","themeVariables":{"lineColor":"#5ecfc4","primaryBorderColor":"#5ecfc4"}}}%%
 flowchart TD
     User["User"]
-    ST["Streamlit UI<br/>:8502 / Cloud"]
+    Product["Render Product<br/>static UI + hub"]
+    API["FastAPI Integrate<br/>/search · /answer"]
+    ST["Streamlit<br/>local :8502 / Cloud secondary"]
     Agent["Agent path<br/>app/agent.py"]
     RAG["RAG path<br/>app/llm.py"]
     Tools["Tools<br/>lookup_order · evaluate_refund · search_policy"]
@@ -160,10 +162,14 @@ flowchart TD
     LLM["LLM<br/>Cerebras Gemma"]
     Safety["Safety guards<br/>app/safety.py"]
     PG[("Postgres / Neon<br/>conversation_logs")]
-    GF["Grafana<br/>:3002"]
+    GF["Grafana Insights<br/>Render / local :3002 Ops"]
     Kestra["Kestra<br/>ingest flow :8085"]
 
-    User --> ST
+    User --> Product
+    Product --> API
+    User -.-> ST
+    API --> Agent
+    API --> RAG
     ST --> Agent
     ST --> RAG
     Agent --> Tools
@@ -176,7 +182,9 @@ flowchart TD
     Agent --> LLM
     RAG --> LLM
     LLM --> Safety
+    Safety --> API
     Safety --> ST
+    API --> PG
     ST --> PG
     PG --> GF
     Kestra --> Policy
@@ -184,7 +192,9 @@ flowchart TD
     linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
     style User fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
-    style ST fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style Product fill:#0f766e,color:#e2e8f0,stroke:#5eead4
+    style API fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style ST fill:#1a2430,color:#e2e8f0,stroke:#64748b
     style Agent fill:#151c24,color:#e2e8f0,stroke:#64748b
     style RAG fill:#1a2430,color:#e2e8f0,stroke:#64748b
     style Tools fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
@@ -199,32 +209,33 @@ flowchart TD
     style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
 ```
 
-**Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
+**Request path (short):** question → Render Product / Integrate API (or secondary Streamlit) → (optional tools) → hybrid RRF → LLM with citations → safety check → log row (+ optional 👍/👎) → Grafana Insights.
 
 ---
 
 ## Decisions and trade-offs
 
 - **Hybrid RRF over keyword-only:** keyword is strong on this small structured policy; vector ranks help paraphrases. RRF fuses both without a learned re-ranker. Trade-off: more moving parts than pure TF-IDF.
-- **Cerebras Gemma over larger hosted models:** Zoomcamp-friendly cost/latency; Cloud secrets use the same OpenAI-compatible client. Trade-off: tool-calling quirks → deterministic tool fallback in [`app/agent.py`](app/agent.py).
-- **Render as official public face:** Product + Insights on Render; Streamlit Cloud kept as a secondary prototype. Trade-off: Blueprint + Docker images instead of one-click Streamlit-only.
-- **Streamlit UI (interim Product):** course-friendly chat; FastAPI Product / Integrate API land in post-grading polish. Trade-off: less flexible as a pure JSON API until Phase 1.
-- **Neon for Cloud logging:** local Compose keeps Postgres on `:5435`; public 👍 needs a reachable DB → Neon + `POSTGRES_SSLMODE=require`. Grafana Insights uses the same DB via `PRA_PG_*`.
+- **Cerebras Gemma over larger hosted models:** Zoomcamp-friendly cost/latency; shared OpenAI-compatible client across Render and Streamlit secrets. Trade-off: tool-calling quirks → deterministic tool fallback in [`app/agent.py`](app/agent.py).
+- **Render as official public face:** Product + Integrate API + Insights on Render; Streamlit Cloud kept as a secondary prototype (may sleep). Trade-off: Blueprint + Docker images instead of one-click Streamlit-only.
+- **Streamlit as secondary / ops UI:** course-era chat and local Compose `:8502` for demos and rubric evidence; official Product is the Render static UI + FastAPI. Trade-off: two public surfaces to maintain.
+- **Neon for public logging:** local Compose keeps Postgres on `:5435`; public 👍 (Render / Streamlit Cloud) needs a reachable DB → Neon + `POSTGRES_SSLMODE=require`. Grafana Insights uses the same DB via `PRA_PG_*`.
 - **Mock orders for tools:** `data/mock_orders.json` demos eligibility without a real OMS. Trade-off: not production order data.
-- **In-memory TF-IDF vector ranks on Cloud:** pgvector is optional; Cloud still runs hybrid RRF without a vector DB volume.
+- **In-memory TF-IDF vector ranks when pgvector is unavailable:** hybrid RRF still runs on free-tier / Cloud demos without a vector DB volume.
 
 ---
 
 ## Project structure
 
 ```text
-app/                 # Streamlit UI, RAG, hybrid RRF, agent tools, safety, eval
+app/                 # Product API, Streamlit UI, RAG, hybrid RRF, agent tools, safety, eval
 data/                # Policy, mock orders, eval sets + results
 flows/               # Kestra ingestion
 grafana/             # Provisioned dashboard + Postgres datasource
 scripts/             # Demos and offline eval helpers
-streamlit_app.py     # Cloud / Compose entrypoint
+streamlit_app.py     # Streamlit Cloud / Compose entrypoint (secondary / local)
 docker-compose.yaml  # postgres · grafana · streamlit · kestra
+render.yaml          # Official Render Blueprint (Product · API · Grafana)
 ```
 
 ---
@@ -249,8 +260,8 @@ Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` an
 
 ### Monitoring (Postgres → Grafana + feedback)
 
-Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).
-Grafana: http://localhost:3002 · Streamlit: http://localhost:8502
+Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).  
+Public Insights: https://policy-refund-agent-grafana.onrender.com · Local Ops: Grafana http://localhost:3002 · Streamlit http://localhost:8502
 
 | Step | Description |
 |------|-------------|
@@ -264,20 +275,22 @@ Grafana: http://localhost:3002 · Streamlit: http://localhost:8502
 
 ![Grafana after live ask + feedback](docs/images/monitoring/grafana-after.png)
 
-Optional — same dashboard with Grafana datasource pointed at **Neon** (Cloud `conversation_logs`):
+Optional — same dashboard with Grafana datasource pointed at **Neon** (public `conversation_logs`):
 
-![Grafana after Cloud traffic on Neon](docs/images/monitoring/grafana-neon-after.png)
+![Grafana after public traffic on Neon](docs/images/monitoring/grafana-neon-after.png)
 
-### Docker Compose (Streamlit in container)
+### Docker Compose (Streamlit in container — local ops)
 
-Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -d streamlit`).
+Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -d streamlit`). Local ops/dev only.
 
 ![Streamlit Compose — refund + feedback](docs/images/compose/streamlit-compose-refund.png)
 
-### Cloud (Streamlit Community Cloud)
+### Secondary prototype (Streamlit Cloud)
 
-Live public app — https://policy-refund-agent.streamlit.app/  
-Agent tools on; demo order `ZK-1001` → **eligible**; Cloud 👍 via Neon Postgres.
+Course-era / bonus evidence — **not** the official Product. App may sleep on free tier.  
+https://policy-refund-agent.streamlit.app/
+
+Agent tools on; demo order `ZK-1001` → **eligible**; 👍 via Neon Postgres when secrets are set.
 
 | Shot | File |
 |------|------|
@@ -285,11 +298,11 @@ Agent tools on; demo order `ZK-1001` → **eligible**; Cloud 👍 via Neon Postg
 | UI + Cloud manage-app log | [`docs/images/cloud/streamlit-cloud-zk1001.png`](docs/images/cloud/streamlit-cloud-zk1001.png) |
 | Korean question (multilingual) | [`docs/images/cloud/streamlit-cloud-zk1001-ko.png`](docs/images/cloud/streamlit-cloud-zk1001-ko.png) |
 
-![Streamlit Cloud — ZK-1001 (UI)](docs/images/cloud/streamlit-cloud-zk1001-ui.png)
+![Streamlit Cloud (secondary) — ZK-1001 (UI)](docs/images/cloud/streamlit-cloud-zk1001-ui.png)
 
-![Streamlit Cloud — ZK-1001 (with deploy log)](docs/images/cloud/streamlit-cloud-zk1001.png)
+![Streamlit Cloud (secondary) — ZK-1001 (with deploy log)](docs/images/cloud/streamlit-cloud-zk1001.png)
 
-![Streamlit Cloud — Korean ZK-1001](docs/images/cloud/streamlit-cloud-zk1001-ko.png)
+![Streamlit Cloud (secondary) — Korean ZK-1001](docs/images/cloud/streamlit-cloud-zk1001-ko.png)
 
 `language: Korean` · agent tools · citations — query rewriting + answer-in-user-language.
 
@@ -307,17 +320,17 @@ Rows marked **capstone extra** are **implemented** features that are not fixed-s
 | **Retrieval flow** | 2 | KB + LLM: [`app/hybrid.py`](app/hybrid.py) (keyword + vector **RRF**) → [`app/llm.py`](app/llm.py) `answer_question` with citations |
 | **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
 | **LLM evaluation** | 2 | Compared **two system prompts** on the same retrieval context: **A** minimal grounded vs **B** production `SUPPORT_SYSTEM_PROMPT` (structured + safety). Judge means **A=4.73** / **B=5.00** (n=5) → **selected B**. Evidence: [`data/eval_llm_approaches.json`](data/eval_llm_approaches.json), script [`scripts/eval_llm_approaches.py`](scripts/eval_llm_approaches.py). Full 26-case judge also in [`data/eval_results.json`](data/eval_results.json) (Fact Pass **100 %**, mean **4.97/5.00**) |
-| **Interface** | 2 | Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` — [Screenshots](#screenshots) |
+| **Interface** | 2 | Official: Render Product chat + hub — https://policy-refund-agent.onrender.com ([Screenshots → Official Product](#official-product-render)). Secondary / local: Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` |
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
-| **Monitoring** | 2 | Postgres `conversation_logs` + Streamlit feedback + Grafana **7 panels** — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json), `:3002` — [Screenshots](#screenshots) |
-| **Containerization** | 2 | `docker compose up -d postgres grafana streamlit` — [`Dockerfile`](Dockerfile), [`docker-compose.yaml`](docker-compose.yaml) |
+| **Monitoring** | 2 | Postgres / Neon `conversation_logs` + feedback + Grafana **7 panels** — Insights on Render; local Ops `:3002` — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json) — [Screenshots](#screenshots) |
+| **Containerization** | 2 | `docker compose up -d postgres grafana streamlit` — [`Dockerfile`](Dockerfile), [`docker-compose.yaml`](docker-compose.yaml); Render Blueprint [`render.yaml`](render.yaml) |
 | **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `requirements.txt` / `pyproject.toml` (Python ≥ 3.12), policy + eval data in `data/` |
 | **Best practice: hybrid search** | +1 | Default `PRA_RETRIEVAL_METHOD=hybrid` — [`app/hybrid.py`](app/hybrid.py) |
 | **Best practice: re-ranking** | +1 | **RRF** fusion of keyword + vector ranked lists (same module) |
 | **Best practice: query rewriting** | +1 | [`app/query.py`](app/query.py) `prepare_search_query` — language detect + English search query for multilingual input |
-| **Agent / tools** (capstone extra) | optional bonus (max +3, reviewer decides) | Not a fixed rubric row — candidate for the official discretionary extra points. Implemented: [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py); Cloud demo `ZK-1001` |
+| **Agent / tools** (capstone extra) | optional bonus (max +3, reviewer decides) | Not a fixed rubric row — candidate for the official discretionary extra points. Implemented: [`app/tools.py`](app/tools.py) + [`app/agent.py`](app/agent.py) — mock `lookup_order` / `evaluate_refund` (`data/mock_orders.json`); demo [`scripts/demo_part_c_tools.py`](scripts/demo_part_c_tools.py); Product / Streamlit demo `ZK-1001` |
 | **Safety** (capstone extra) | optional bonus (max +3, reviewer decides) | Same optional pool as above (implemented, not unfinished). [`app/safety.py`](app/safety.py) — injection block + unanswerable/OOS CS fallback; demo [`scripts/demo_part_d_safety.py`](scripts/demo_part_d_safety.py) |
-| **Bonus: cloud deployment** | +2 | Official: Render ([`docs/RENDER.md`](docs/RENDER.md)); secondary: https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Cloud](#cloud-streamlit-community-cloud) |
+| **Bonus: cloud deployment** | +2 | Official: Render ([`docs/RENDER.md`](docs/RENDER.md)); secondary prototype: https://policy-refund-agent.streamlit.app/ — [Cloud deployment](#cloud-deployment); screenshots under [Screenshots → Secondary prototype](#secondary-prototype-streamlit-cloud) |
 
 ### Quick verification commands
 
@@ -336,16 +349,17 @@ docker compose up -d postgres grafana streamlit              # full stack
 
 ## Cloud deployment
 
-### Official: Render (Product + Insights)
+### Official: Render (Product + Insights + Integrate)
 
-Primary public face. Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.md).
+Primary public face — Product UI, Integrate API (`/health` `/search` `/answer` `/docs`), and Grafana Insights.  
+Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.md).
 
-After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` stays **Ops**.
+After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
 
-### Secondary: Streamlit Community Cloud
+### Secondary prototype: Streamlit Community Cloud
 
-Prototype / bonus evidence only — not the official product URL.  
-Screenshots: [Screenshots → Cloud](#cloud-streamlit-community-cloud).
+Course-era demo and rubric bonus evidence only — **not** the official product URL. May sleep on free tier.  
+Screenshots: [Screenshots → Secondary prototype](#secondary-prototype-streamlit-cloud).
 
 **Secondary live:** https://policy-refund-agent.streamlit.app/
 
@@ -359,16 +373,16 @@ How to redeploy (secondary):
 
 Notes:
 
-- **Neon Postgres (optional):** enable Cloud 👍/👎 by adding `POSTGRES_*` + `POSTGRES_SSLMODE=require` to Streamlit Secrets (see [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example)). Point local Grafana at the same DB with `PRA_PG_*` in `.env`, then `docker compose up -d grafana`.
-- Without Postgres secrets, Q&A and Citations still work; **👍/👎 feedback is unavailable on Cloud**.
+- **Neon Postgres (optional):** enable Streamlit Cloud 👍/👎 by adding `POSTGRES_*` + `POSTGRES_SSLMODE=require` to Streamlit Secrets (see [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example)). Point local Grafana at the same DB with `PRA_PG_*` in `.env`, then `docker compose up -d grafana`.
+- Without Postgres secrets, Q&A and Citations still work; **👍/👎 feedback is unavailable on Streamlit Cloud**.
 - Hybrid RRF uses **in-memory TF-IDF** vector ranks when pgvector is unavailable.
-- Full monitoring UI remains on local Grafana (`:3002`) even when the app DB is Neon.
+- Full monitoring UI: Grafana Insights on Render, or local Ops Grafana (`:3002`) when the app DB is Neon.
 
-### Neon setup (Cloud thumbs + shared Grafana DB)
+### Neon setup (public thumbs + shared Grafana DB)
 
 1. Create a free project at [console.neon.tech](https://console.neon.tech).
 2. Copy connection fields (host, port `5432`, database, user, password). Prefer the **pooled** connection host if shown.
-3. Streamlit Cloud → your app → **Settings → Secrets** — append:
+3. For the **Streamlit Cloud** secondary app → **Settings → Secrets** — append:
 
 ```toml
 POSTGRES_HOST = "ep-xxxx.region.aws.neon.tech"
@@ -390,7 +404,7 @@ PRA_PG_DB=neondb
 PRA_PG_SSLMODE=require
 ```
 
-Then: `docker compose up -d grafana` and open http://localhost:3002 (admin/admin). Re-take monitoring screenshots if panels update from Cloud traffic.
+Then: `docker compose up -d grafana` and open http://localhost:3002 (admin/admin). Re-take monitoring screenshots if panels update from public traffic.
 
 ---
 
