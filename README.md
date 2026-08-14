@@ -222,10 +222,16 @@ docker-compose.yaml  # postgres · grafana · streamlit · kestra
 
 ## Screenshots
 
-### Hybrid retrieval
+### Official Product (Render)
+
+Live Product UI on Render — ZK-1001 eligible demo with grounded answer + citations.  
+https://policy-refund-agent.onrender.com
+
+![Render Product — ZK-1001](docs/images/product/render-product-zk1001.png)
+
+### Hybrid retrieval (secondary — Streamlit)
 
 \* *Secondary Streamlit prototype (dev/demo)* — not the official Product UI.  
-Official Product (Render): https://policy-refund-agent.onrender.com  
 Streamlit: [Cloud](https://policy-refund-agent.streamlit.app/) · [Local `:8502`](http://localhost:8502)
 
 Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` and per-section RRF scores.

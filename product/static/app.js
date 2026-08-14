@@ -406,17 +406,21 @@
   }
 
   function setBusy(busy) {
-    input.disabled = busy;
-    sendBtn.disabled = busy;
-    toolsToggle.disabled = busy;
+    if (input) {
+      input.disabled = busy;
+      input.placeholder = busy
+        ? "Working..."
+        : "Ask about refunds, returns, or order ZK-1001...";
+    }
+    if (sendBtn) sendBtn.disabled = busy;
+    if (toolsToggle) toolsToggle.disabled = busy;
     if (modelSelect) modelSelect.disabled = busy;
     if (retrievalSelect) retrievalSelect.disabled = busy;
-    chips.querySelectorAll("button").forEach(function (b) {
-      b.disabled = busy;
-    });
-    input.placeholder = busy
-      ? "Working…"
-      : "Ask about refunds, returns, or order ZK-1001…";
+    if (chips) {
+      chips.querySelectorAll("button").forEach(function (b) {
+        b.disabled = busy;
+      });
+    }
   }
 
   function ask(question) {
@@ -425,7 +429,7 @@
     const welcome = document.getElementById("welcome");
     if (welcome) welcome.remove();
     addMessage("user", q);
-    input.value = "";
+    if (input) input.value = "";
     setBusy(true);
     showTyping();
 
@@ -436,7 +440,7 @@
         query: q,
         num_results: 3,
         use_llm: true,
-        use_tools: !!toolsToggle.checked,
+        use_tools: !!(toolsToggle && toolsToggle.checked),
         method: retrievalSelect ? retrievalSelect.value : "hybrid",
         model: modelSelect ? modelSelect.value : undefined,
       }),
@@ -461,20 +465,24 @@
       .finally(function () {
         hideTyping();
         setBusy(false);
-        input.focus();
+        if (input) input.focus();
       });
   }
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    ask(input.value);
-  });
+  if (form) {
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      ask(input ? input.value : "");
+    });
+  }
 
-  chips.addEventListener("click", function (e) {
-    const btn = e.target.closest("button[data-q]");
-    if (!btn || btn.disabled) return;
-    ask(btn.getAttribute("data-q"));
-  });
+  if (chips) {
+    chips.addEventListener("click", function (e) {
+      const btn = e.target.closest("button[data-q]");
+      if (!btn || btn.disabled) return;
+      ask(btn.getAttribute("data-q"));
+    });
+  }
 
   if (clearBtn) {
     clearBtn.addEventListener("click", function () {

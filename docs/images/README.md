@@ -16,7 +16,13 @@ For README and portfolio use.
 
 ## Canonical (README)
 
-### Hybrid retrieval
+### Official Product (Render)
+
+| File | Description |
+|------|-------------|
+| `product/render-product-zk1001.png` | Official Product on [Render](https://policy-refund-agent.onrender.com) — ZK-1001 eligible + citations (agent tools) |
+
+### Hybrid retrieval (secondary — Streamlit)
 
 | File | Description |
 |------|-------------|
