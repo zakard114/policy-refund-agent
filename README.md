@@ -147,12 +147,9 @@ Compose Streamlit image must be rebuilt after code changes: `docker compose up -
 Technical graph (same system, code-oriented):
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"lineColor":"#5ecfc4","primaryBorderColor":"#5ecfc4"}}}%%
 flowchart TD
     User["User"]
-    Product["Render Product<br/>static UI + hub"]
-    API["FastAPI Integrate<br/>/search · /answer"]
-    ST["Streamlit<br/>local :8502 / Cloud secondary"]
+    ST["Streamlit UI<br/>:8502 / Cloud"]
     Agent["Agent path<br/>app/agent.py"]
     RAG["RAG path<br/>app/llm.py"]
     Tools["Tools<br/>lookup_order · evaluate_refund · search_policy"]
@@ -163,14 +160,10 @@ flowchart TD
     LLM["LLM<br/>Cerebras Gemma"]
     Safety["Safety guards<br/>app/safety.py"]
     PG[("Postgres / Neon<br/>conversation_logs")]
-    GF["Grafana Insights<br/>Render / local :3002 Ops"]
+    GF["Grafana<br/>:3002"]
     Kestra["Kestra<br/>ingest flow :8085"]
 
-    User --> Product
-    Product --> API
-    User -.-> ST
-    API --> Agent
-    API --> RAG
+    User --> ST
     ST --> Agent
     ST --> RAG
     Agent --> Tools
@@ -183,9 +176,7 @@ flowchart TD
     Agent --> LLM
     RAG --> LLM
     LLM --> Safety
-    Safety --> API
     Safety --> ST
-    API --> PG
     ST --> PG
     PG --> GF
     Kestra --> Policy
@@ -193,9 +184,7 @@ flowchart TD
     linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
     style User fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
-    style Product fill:#0f766e,color:#e2e8f0,stroke:#5eead4
-    style API fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
-    style ST fill:#1a2430,color:#e2e8f0,stroke:#64748b
+    style ST fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
     style Agent fill:#151c24,color:#e2e8f0,stroke:#64748b
     style RAG fill:#1a2430,color:#e2e8f0,stroke:#64748b
     style Tools fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
@@ -210,7 +199,7 @@ flowchart TD
     style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
 ```
 
-**Request path (short):** question → Render Product / Integrate API (or secondary Streamlit) → (optional tools) → hybrid RRF → LLM with citations → safety check → log row (+ optional 👍/👎) → Grafana Insights.
+**Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
 
 ---
 
@@ -357,7 +346,7 @@ Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.m
 
 After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
 
-**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git.
+**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git. Step-by-step (Korean): [`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md).
 
 ### Secondary prototype: Streamlit Community Cloud
 
