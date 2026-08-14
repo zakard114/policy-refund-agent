@@ -183,11 +183,20 @@ flowchart TD
 
     linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
-    style Hybrid fill:#0f766e,color:#fff
-    style LLM fill:#b45309,color:#fff
-    style PG fill:#1e3a5f,color:#fff
-    style GF fill:#c2410c,color:#fff
-    style Safety fill:#334155,color:#fff
+    style User fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
+    style ST fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style Agent fill:#151c24,color:#e2e8f0,stroke:#64748b
+    style RAG fill:#1a2430,color:#e2e8f0,stroke:#64748b
+    style Tools fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
+    style Hybrid fill:#0f766e,color:#e2e8f0,stroke:#5eead4
+    style KW fill:#1a2430,color:#e2e8f0,stroke:#64748b
+    style Vec fill:#151c24,color:#e2e8f0,stroke:#64748b
+    style Policy fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style LLM fill:#b45309,color:#e2e8f0,stroke:#fbbf24
+    style Safety fill:#334155,color:#e2e8f0,stroke:#94a3b8
+    style PG fill:#1e3a5f,color:#e2e8f0,stroke:#60a5fa
+    style GF fill:#c2410c,color:#e2e8f0,stroke:#fb923c
+    style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
 ```
 
 **Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
