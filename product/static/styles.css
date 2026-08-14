@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #0b0f14;
   --bg-elev: #121820;
   --panel: #151c24;
@@ -395,7 +395,7 @@ body {
   cursor: pointer;
 }
 .rail-toggle input[type="checkbox"] {
-  accent-color: var(--teal);
+  accent-color: var(--teal-dim);
   width: 15px;
   height: 15px;
   cursor: pointer;
