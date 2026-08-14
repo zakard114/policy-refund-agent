@@ -36,6 +36,8 @@ PRA_OPS_PASSWORD=your-chosen-password-here
 
 ## ☁️ Step 2. Render (production) setup
 
+**Local `.env` does not affect Render** — the Docker image does not include your project `.env`; set `PRA_OPS_PASSWORD` separately in the Render Dashboard.
+
 Set this on the **Product** service only (`render.yaml` marks it `sync: false` as a secret).
 
 1. Log in to the [Render dashboard](https://dashboard.render.com).
