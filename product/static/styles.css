@@ -394,6 +394,13 @@ body {
   margin: 10px 0 6px;
   cursor: pointer;
 }
+.rail-toggle input[type="checkbox"] {
+  accent-color: var(--teal);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 .rail-toggle-text {
   display: inline-flex;
   align-items: center;

@@ -3,3 +3,9 @@ gatherUsageStats = false
 
 [server]
 headless = true
+
+[theme]
+primaryColor = "#00d1c1"
+backgroundColor = "#0b0f14"
+secondaryBackgroundColor = "#151c24"
+textColor = "#c5ced9"
