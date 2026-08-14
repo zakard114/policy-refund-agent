@@ -146,6 +146,7 @@ Compose Streamlit image must be rebuilt after code changes: `docker compose up -
 Technical graph (same system, code-oriented):
 
 ```mermaid
+%%{init: {"theme":"base","themeVariables":{"lineColor":"#5ecfc4","primaryBorderColor":"#5ecfc4"}}}%%
 flowchart TD
     User["User"]
     ST["Streamlit UI<br/>:8502 / Cloud"]
@@ -179,6 +180,8 @@ flowchart TD
     ST --> PG
     PG --> GF
     Kestra --> Policy
+
+    linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
     style Hybrid fill:#0f766e,color:#fff
     style LLM fill:#b45309,color:#fff
