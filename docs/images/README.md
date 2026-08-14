@@ -51,6 +51,13 @@ Sequence: empty dashboard → Streamlit question with 👍 → Grafana metrics u
 |------|-------------|
 | `compose/streamlit-compose-refund.png` | Compose `:8502` — refund answer + Citations + **Feedback recorded: helpful 👍** |
 
+### Ops 🔒 (password-gated)
+
+| File | Description |
+|------|-------------|
+| `ops/ops-unlock-gate.png` | Hub corner **Ops 🔒** — shared-password prompt (value masked by the input itself) |
+| `ops/ops-unlocked-guidance.png` | Unlocked local operator guidance — Grafana `:3002`, Kestra `:8085`, Compose command. Postgres host **redacted**: original pixels overwritten with a flat opaque fill plus a painted `<host:port redacted>` bar (not a blur — nothing recoverable) |
+
 ### Cloud (secondary — Streamlit Community Cloud)
 
 | File | Description |

@@ -275,6 +275,14 @@ Compose stack on `:8502` — refund Q&A + citations + 👍 (`docker compose up -
 
 ![Streamlit Compose — refund + feedback](docs/images/compose/streamlit-compose-refund.png)
 
+### Ops 🔒 (password-gated)
+
+Hub corner **Ops 🔒** — password gate ([`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md)) that only prints local operator URLs (Grafana `:3002`, Kestra `:8085`, Compose command). Kestra and local Postgres are never exposed publicly; the Postgres host is redacted in the screenshot.
+
+![Ops unlock gate — shared password prompt](docs/images/ops/ops-unlock-gate.png)
+
+![Ops unlocked — local operator guidance with Postgres host redacted](docs/images/ops/ops-unlocked-guidance.png)
+
 ### Secondary prototype (Streamlit Cloud)
 
 Course-era / bonus evidence — **not** the official Product. App may sleep on free tier.  
