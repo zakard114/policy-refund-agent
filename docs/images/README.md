@@ -12,7 +12,7 @@ For README and portfolio use.
 
 | File | Description |
 |------|-------------|
-| `architecture/live-path-infographic-v1.png` | Public live-path infographic (Product → API → Agent/RAG → Hybrid RRF → LLM → Neon/Grafana). README Mermaid graph kept as the code-oriented view. |
+| `architecture/live-path-infographic-v1.png` | Public live-path infographic — original v1 stage layout on dark charcoal (#0b0f14) with soft teal accents (Product → API → Agent/RAG → Hybrid RRF → LLM → Neon/Grafana). README Mermaid graph kept as the code-oriented view. |
 
 ## Canonical (README)
 
