@@ -38,17 +38,26 @@ PRA_OPS_PASSWORD=your-chosen-password-here
 
 **Local `.env` does not affect Render** — the Docker image does not include your project `.env`; set `PRA_OPS_PASSWORD` separately in the Render Dashboard.
 
-Set this on the **Product** service only (`render.yaml` marks it `sync: false` as a secret).
+The **Ops 🔒** UI and `/config` endpoint live on the **Product** service only — not on Integrate API.
+
+| Service name | URL | Role | Needs `PRA_OPS_PASSWORD`? |
+|--------------|-----|------|---------------------------|
+| **`policy-refund-agent`** | [policy-refund-agent.onrender.com](https://policy-refund-agent.onrender.com) | Product hub + chat + **Ops 🔒** | **Yes — set it here** |
+| `policy-refund-agent-api` | [policy-refund-agent-api.onrender.com](https://policy-refund-agent-api.onrender.com) | Integrate API (`/health`, `/search`, `/answer`) | No — setting it here does **not** unlock Product Ops |
+
+> **Common mistake:** If you open **`policy-refund-agent-api`**, you will see vars like `CEREBRAS_*` and `PRA_INSIGHTS_URL`, but **`PRA_OPS_PASSWORD` is not listed** (and is not in that service's Blueprint). That is expected. Switch to **Product** below.
 
 1. Log in to the [Render dashboard](https://dashboard.render.com).
-2. Open service **`policy-refund-agent`** (Product).  
-   *(You may also set it on Integrate-only `policy-refund-agent-api`, but the hub **Ops 🔒** UI is served by **Product**.)*
-3. Click **Environment** in the left menu.
-4. If `PRA_OPS_PASSWORD` is missing, click **Add Environment Variable**:
+2. In the **left sidebar**, select service **`policy-refund-agent`** (Product — URL ends with `.onrender.com`, **without** `-api`).  
+   **Do not** use `policy-refund-agent-api`.
+3. In the **left sidebar**, click **Environment**.
+4. `PRA_OPS_PASSWORD` will **not** exist yet on a fresh deploy — click **Add Environment Variable** (or **Edit** → add a row):
    - **Key:** `PRA_OPS_PASSWORD`
    - **Value:** your chosen password (do not put plaintext in Blueprint/GitHub)
 5. Click **Save Changes**.
 6. Wait for auto-redeploy or run **Manual Deploy** → confirm deploy completes and status is **Healthy**.
+
+> **Note:** If you set `PRA_OPS_PASSWORD` only on `policy-refund-agent-api`, Product Ops 🔒 will still show *"Ops password not configured"* (`ops_configured: false` on `/config`). Always set it on **Product** (`policy-refund-agent`).
 
 ---
 
