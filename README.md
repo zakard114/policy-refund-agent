@@ -346,7 +346,7 @@ Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.m
 
 After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
 
-**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git. Step-by-step (Korean): [`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md).
+**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git. Step-by-step: [`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md).
 
 ### Secondary prototype: Streamlit Community Cloud
 
