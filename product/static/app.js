@@ -520,52 +520,85 @@
       if (e.target === opsModal) closeOps();
     });
   }
-  if (opsSubmit) {
-    opsSubmit.addEventListener("click", function () {
-      opsError.hidden = true;
-      if (!cfg.ops_configured) {
-        opsError.textContent = "Ops password not configured on this deploy (PRA_OPS_PASSWORD).";
-        opsError.hidden = false;
-        return;
-      }
-      opsSubmit.disabled = true;
-      fetch("/ops/unlock", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: opsPassword.value || "" }),
-      })
-        .then(function (resp) {
-          return resp.json().then(function (data) {
-            return { ok: resp.ok, data: data };
-          });
+  function opsDetailMessage(data) {
+    if (!data || data.detail == null) return "Unlock failed";
+    if (typeof data.detail === "string") return data.detail;
+    if (Array.isArray(data.detail)) {
+      return data.detail
+        .map(function (d) {
+          return (d && d.msg) || JSON.stringify(d);
         })
-        .then(function (res) {
-          if (!res.ok) {
-            opsError.textContent =
-              (res.data && res.data.detail) || "Unlock failed";
-            opsError.hidden = false;
-            return;
-          }
-          const local = res.data.local || {};
-          opsResult.textContent = [
-            res.data.note,
-            "",
-            "Grafana Ops: " + (local.grafana_ops || ""),
-            "Postgres:     " + (local.postgres || ""),
-            "Kestra:       " + (local.kestra || ""),
-            "Compose:      " + (local.compose || ""),
-            "",
-            res.data.insights_admin || "",
-          ].join("\n");
-          opsResult.hidden = false;
-        })
-        .catch(function () {
-          opsError.textContent = "Network error";
-          opsError.hidden = false;
-        })
-        .finally(function () {
-          opsSubmit.disabled = false;
+        .join("; ");
+    }
+    return String(data.detail);
+  }
+
+  function submitOpsUnlock() {
+    opsError.hidden = true;
+    opsResult.hidden = true;
+    if (!cfg.ops_configured) {
+      opsError.textContent =
+        "Ops password not configured on this deploy (set PRA_OPS_PASSWORD).";
+      opsError.hidden = false;
+      return;
+    }
+    const password = (opsPassword && opsPassword.value) || "";
+    if (!password.trim()) {
+      opsError.textContent = "Enter the Ops password.";
+      opsError.hidden = false;
+      return;
+    }
+    if (opsSubmit) opsSubmit.disabled = true;
+    fetch("/ops/unlock", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password }),
+    })
+      .then(function (resp) {
+        return resp.json().then(function (data) {
+          return { ok: resp.ok, data: data };
         });
+      })
+      .then(function (res) {
+        if (!res.ok) {
+          opsError.textContent = opsDetailMessage(res.data);
+          opsError.hidden = false;
+          return;
+        }
+        const local = res.data.local || {};
+        opsResult.textContent = [
+          res.data.note,
+          "",
+          "Grafana Ops: " + (local.grafana_ops || ""),
+          "Postgres:     " + (local.postgres || ""),
+          "Kestra:       " + (local.kestra || ""),
+          "Compose:      " + (local.compose || ""),
+          "",
+          res.data.insights_admin || "",
+        ].join("\n");
+        opsResult.hidden = false;
+      })
+      .catch(function () {
+        opsError.textContent = "Network error";
+        opsError.hidden = false;
+      })
+      .finally(function () {
+        if (opsSubmit) opsSubmit.disabled = false;
+      });
+  }
+
+  if (opsSubmit) {
+    opsSubmit.addEventListener("click", submitOpsUnlock);
+  }
+  if (opsPassword) {
+    opsPassword.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitOpsUnlock();
+      }
     });
   }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && opsModal && !opsModal.hidden) closeOps();
+  });
 })();

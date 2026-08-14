@@ -55,8 +55,11 @@ Dashboard will ask for env vars marked sync:false. Use the **same Neon** as Stre
 | `POSTGRES_DB` | e.g. `neondb` |
 | `POSTGRES_USER` | e.g. `neondb_owner` |
 | `POSTGRES_PASSWORD` | Neon password |
+| `PRA_OPS_PASSWORD` | shared Ops unlock for Product hub **Ops 🔒** (local guidance only; fail-closed if unset) |
 
 (`POSTGRES_PORT=5432`, `POSTGRES_SSLMODE=require` are usually prefilled.)
+
+Ops stays locked off the public face: set `PRA_OPS_PASSWORD` in the Dashboard for **Product** (`policy-refund-agent`). Never commit the real value; never publish it in README. If unset, `/ops/unlock` returns 503 and the UI refuses unlock.
 
 **Grafana** (`policy-refund-agent-grafana`):
 

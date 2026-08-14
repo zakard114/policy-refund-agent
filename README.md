@@ -61,6 +61,7 @@ Replace the example `cd …` with your own clone path. Relative paths like `data
 | Role | Provider | Variables |
 |------|----------|-----------|
 | App LLM | **Gemma on Cerebras** (OpenAI-compatible) | `PRA_LLM_BACKEND=cerebras`, `CEREBRAS_*` in `.env` |
+| Ops hub gate | Local guidance only (password-locked) | `PRA_OPS_PASSWORD` in `.env` / Render Dashboard — **not** published in README |
 
 ```powershell
 # Example path (replace with your clone root):
@@ -355,6 +356,8 @@ Primary public face — Product UI, Integrate API (`/health` `/search` `/answer`
 Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.md).
 
 After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
+
+**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git.
 
 ### Secondary prototype: Streamlit Community Cloud
 
