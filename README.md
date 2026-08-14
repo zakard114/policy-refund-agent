@@ -221,8 +221,11 @@ docker-compose.yaml  # postgres · grafana · streamlit · kestra
 
 ### Hybrid retrieval
 
-Hybrid RAG chat (keyword + vector **RRF**) — http://localhost:8502
-Caption shows `retrieval: hybrid` and per-section RRF scores.
+\* *Secondary Streamlit prototype (dev/demo)* — not the official Product UI.  
+Official Product (Render): https://policy-refund-agent.onrender.com  
+Streamlit: [Cloud](https://policy-refund-agent.streamlit.app/) · [Local `:8502`](http://localhost:8502)
+
+Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` and per-section RRF scores.
 
 ![Streamlit hybrid chat](docs/images/hybrid/hybrid_ui.png)
 

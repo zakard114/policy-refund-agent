@@ -20,7 +20,7 @@ For README and portfolio use.
 
 | File | Description |
 |------|-------------|
-| `hybrid/hybrid_ui.png` | Streamlit `:8502` — `retrieval: hybrid` + RRF scores |
+| `hybrid/hybrid_ui.png` | *Secondary Streamlit prototype (dev/demo)* — local `:8502` / [Cloud](https://policy-refund-agent.streamlit.app/); not official Render Product. `retrieval: hybrid` + RRF scores |
 | `hybrid/hybrid_grafana.png` | Grafana `:3002` — hybrid-era monitoring snapshot |
 
 Stable aliases (same bytes as hybrid):
