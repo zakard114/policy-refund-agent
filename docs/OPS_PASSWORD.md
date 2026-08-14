@@ -19,13 +19,18 @@ Ops unlock lives on **Product only**. If you open the wrong service, you will wa
 | **`policy-refund-agent`** ✅ | [policy-refund-agent.onrender.com](https://policy-refund-agent.onrender.com) | Product hub + chat + **Ops 🔒** | **Yes — set it here** |
 | **`policy-refund-agent-api`** ❌ | [policy-refund-agent-api.onrender.com](https://policy-refund-agent-api.onrender.com) | Integrate API (`/health`, `/search`, `/answer`) | **No — wrong service for Ops** |
 
-**You are on the wrong service if the Environment list shows:**
+**You are on the wrong service if:**
 
-- `CEREBRAS_*`, `GROQ_*`, or other LLM provider keys typical of the API deploy
-- `PRA_INSIGHTS_URL` while the browser URL contains **`policy-refund-agent-api`**
-- **`PRA_OPS_PASSWORD` is missing** and you expected it to be pre-listed — on Product it is **not pre-listed**; you must **Add** it (see Step 2)
+- The browser / service URL contains **`policy-refund-agent-api`**
+- The service name is **`policy-refund-agent-api`** (Integrate API)
 
 Switch back to **`policy-refund-agent`** (URL **without** `-api`).
+
+### ✅ On Product — missing `PRA_OPS_PASSWORD` is EXPECTED
+
+You are on the **correct** service when the name is **`policy-refund-agent`** and the Environment list already shows many vars (`CEREBRAS_*`, `POSTGRES_*`, `PRA_*`, …) but **`PRA_OPS_PASSWORD` is not in the list**.
+
+That is **not broken**. In `render.yaml` the key is `sync: false`, so Render does **not** create or show it until you add it yourself in the Dashboard (Step 2). Seeing lots of other env vars and no Ops password row means: right service — now Add/Edit.
 
 ---
 
@@ -59,17 +64,22 @@ PRA_OPS_PASSWORD=your-chosen-password-here
 
 The **Ops 🔒** UI and `/config` endpoint live on the **Product** service only — not on Integrate API.
 
-### Navigation path (Render Dashboard)
+### Navigation path (Render Dashboard — current UI)
 
 1. Log in to the [Render dashboard](https://dashboard.render.com).
-2. **Left sidebar** → click service **`policy-refund-agent`** (Product — URL ends with `.onrender.com`, **without** `-api`).  
+2. **Left sidebar** → open service **`policy-refund-agent`** (Product — URL ends with `.onrender.com`, **without** `-api`).  
    **Do not** open `policy-refund-agent-api`.
 3. **Left sidebar** → click **Environment**.
-4. **`PRA_OPS_PASSWORD` will not appear in the list yet** — that is normal. Click **Add Environment Variable** (or **Edit** → add a row):
+4. Confirm you see other vars (`CEREBRAS_*`, `POSTGRES_*`, `PRA_*`, …) and **no** `PRA_OPS_PASSWORD` yet — expected (`sync: false`).
+5. In the **Environment Variables** section, either:
+   - Click **Edit** (top right of that section), **or**
+   - Click **Add Environment Variable**
+6. Add a **new row**:
    - **Key:** `PRA_OPS_PASSWORD`
-   - **Value:** your chosen password (do not put plaintext in Blueprint/GitHub)
-5. Click **Save Changes**.
-6. Wait for auto-redeploy or run **Manual Deploy** → confirm deploy completes and status is **Healthy**.
+   - **Value:** the same password as in your local project `.env` (never paste it into GitHub, Blueprint, README, or chat)
+7. Click **Save Changes**.
+8. Wait for the deploy to finish — status **Healthy** (auto-redeploy after Save, or **Manual Deploy** if needed).
+9. Verify: open [https://policy-refund-agent.onrender.com/config](https://policy-refund-agent.onrender.com/config) → `"ops_configured": true`.
 
 > **Note:** If you set `PRA_OPS_PASSWORD` only on `policy-refund-agent-api`, Product Ops 🔒 will still show *"Ops password not configured"* (`ops_configured: false` on `/config`). Always set it on **Product** (`policy-refund-agent`).
 
@@ -118,7 +128,7 @@ curl -s -o - -w "`nHTTP %{http_code}`n" -X POST https://policy-refund-agent.onre
 
 1. Choose a new password (do not paste it into docs, chat, or issues).
 2. **Local:** update `PRA_OPS_PASSWORD` in the project `.env` → restart the app.
-3. **Render:** **Sidebar → `policy-refund-agent` → Environment** → replace the value → **Save** → wait for redeploy.
+3. **Render:** **Sidebar → `policy-refund-agent` → Environment** → **Edit** (or find the existing row) → replace the value → **Save Changes** → wait for redeploy **Healthy**.
 4. Run Step 3: `/config` shows `ops_configured: true`; new password unlocks; old password returns **401**.
 
 ---
@@ -126,7 +136,8 @@ curl -s -o - -w "`nHTTP %{http_code}`n" -X POST https://policy-refund-agent.onre
 ## 📋 Quick checklist (Render)
 
 - [ ] Opened **Product** `policy-refund-agent` (✅), not `policy-refund-agent-api` (❌)
-- [ ] **Added** `PRA_OPS_PASSWORD` via **Add Environment Variable** (not expecting it pre-listed)
+- [ ] Env list can show many vars and still omit `PRA_OPS_PASSWORD` until you add it (`sync: false` — expected)
+- [ ] **Edit** or **Add Environment Variable** → Key `PRA_OPS_PASSWORD` → Save Changes
 - [ ] Real value not in git / README / issues
 - [ ] After Save, deploy is Healthy
 - [ ] [policy-refund-agent.onrender.com/config](https://policy-refund-agent.onrender.com/config) → `ops_configured: true`
