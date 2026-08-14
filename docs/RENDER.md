@@ -61,6 +61,8 @@ Dashboard will ask for env vars marked sync:false. Use the **same Neon** as Stre
 
 Ops stays locked off the public face: set `PRA_OPS_PASSWORD` in the Dashboard for **Product** (`policy-refund-agent`). Never commit the real value; never publish it in README. If unset, `/ops/unlock` returns 503 and the UI refuses unlock.
 
+**Operator guide (Korean):** [`docs/OPS_PASSWORD.md`](OPS_PASSWORD.md) — create password, Render checklist, UI/`curl` test steps (401 vs 503).
+
 **Grafana** (`policy-refund-agent-grafana`):
 
 | Key | Value |
