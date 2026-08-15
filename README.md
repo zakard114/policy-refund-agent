@@ -14,6 +14,33 @@ Try chips: ZK-1001 · Non-refundable · 한국어 · or ask freely (Agent tools 
 
 Hub on Product: **Product · Insights · Integrate · GitHub** · Ops locked (local only).
 
+## Mission
+
+**Zakard Shop Refund CS — precision over vibes.**  
+Refund handling needs clarity, not guesses. This agent answers from **verified policy documents and order data (demo tools)** only.
+
+- Safely abstains on unverified or out-of-scope questions to minimize hallucinations.
+- Every response carries citations and leaves operational logs.
+
+Keeping the stack behind the scenes while delivering fast, grounded answers — that is why this agent exists.
+
+## Table of contents
+
+- [Mission](#mission)
+- [Problem](#problem)
+- [Status](#status)
+- [Configuration](#configuration)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Architecture](#architecture)
+- [Decisions and trade-offs](#decisions-and-trade-offs)
+- [Project structure](#project-structure)
+- [Screenshots](#screenshots)
+- [Evaluation criteria](#evaluation-criteria)
+- [Cloud deployment](#cloud-deployment)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
+
 ---
 
 ## Problem
@@ -36,6 +63,9 @@ Support teams need answers **strictly from policy documents** and consistent ref
 | File | [`data/refund_policy.md`](data/refund_policy.md) |
 | License | Original text written for this project (demo use); not scraped from a live retailer |
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## Status
@@ -53,6 +83,9 @@ Commands below assume you are in the **repository root** after cloning.
 | **Example used in this README** | `E:\IT_SPACES\AI\Projects\llm\policy-refund-agent` (author’s Windows layout — **not required**) |
 
 Replace the example `cd …` with your own clone path. Relative paths like `data/`, `app/`, and `docker compose` are the same everywhere.
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -72,6 +105,9 @@ uv sync
 uv run pra-check-llm
 ```
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## Prerequisites
@@ -79,6 +115,9 @@ uv run pra-check-llm
 - Python 3.12+, [uv](https://docs.astral.sh/uv/)
 - [Docker Desktop](https://www.docker.com/)
 - LLM API key (Cerebras / OpenAI-compatible)
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -135,6 +174,9 @@ python scripts\demo_part_c_tools.py --with-llm
 Compose Streamlit image must be rebuilt after code changes: `docker compose up -d --build streamlit`.
 
 `scripts/use_e_drive.ps1` is optional (keeps uv/HF caches on the author’s `E:` drive). Skip it if you use default cache locations.
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -201,6 +243,9 @@ flowchart TD
 
 **Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## Decisions and trade-offs
@@ -212,6 +257,9 @@ flowchart TD
 - **Neon for public logging:** local Compose keeps Postgres on `:5435`; public 👍 (Render / Streamlit Cloud) needs a reachable DB → Neon + `POSTGRES_SSLMODE=require`. Grafana Insights uses the same DB via `PRA_PG_*`.
 - **Mock orders for tools:** `data/mock_orders.json` demos eligibility without a real OMS. Trade-off: not production order data.
 - **In-memory TF-IDF vector ranks when pgvector is unavailable:** hybrid RRF still runs on free-tier / Cloud demos without a vector DB volume.
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -227,6 +275,9 @@ streamlit_app.py     # Streamlit Cloud / Compose entrypoint (secondary / local)
 docker-compose.yaml  # postgres · grafana · streamlit · kestra
 render.yaml          # Official Render Blueprint (Product · API · Grafana)
 ```
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -304,6 +355,9 @@ Agent tools on; demo order `ZK-1001` → **eligible**; 👍 via Neon Postgres wh
 
 `language: Korean` · agent tools · citations — query rewriting + answer-in-user-language.
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## Evaluation criteria
@@ -342,6 +396,9 @@ python scripts\demo_part_d_safety.py                         # unanswerable + in
 python scripts\eval_llm_approaches.py                        # prompt A vs B (LLM eval)
 docker compose up -d postgres grafana streamlit              # full stack
 ```
+
+
+[↑ Contents](#table-of-contents)
 
 ---
 
@@ -435,6 +492,9 @@ PRA_PG_SSLMODE=require
 
 Then: `docker compose up -d grafana` and open http://localhost:3002 (admin/admin). Re-take monitoring screenshots if panels update from public traffic.
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## Troubleshooting
@@ -456,9 +516,14 @@ Port map: `:3000` / `:3001` belong to other project stacks. **PRA uses `:3002` o
 
 Detailed symptoms, root causes, and a step-by-step checklist: [`docs/DOCKER_TROUBLESHOOT.md`](docs/DOCKER_TROUBLESHOOT.md).
 
+
+[↑ Contents](#table-of-contents)
+
 ---
 
 ## License
 
 - **Code:** MIT
 - **Policy text:** synthetic Zakard Shop document in `data/refund_policy.md`, created for this demo
+
+[↑ Contents](#table-of-contents)
