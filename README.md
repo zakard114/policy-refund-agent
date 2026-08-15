@@ -137,7 +137,7 @@ docker compose ps
 # Postgres host :5435 (from Streamlit container use host name `postgres`)
 ```
 
-Optional orchestration UI: `docker compose up -d kestra-postgres kestra` → http://localhost:8085 (`admin@kestra.io` / `Admin1234!`).
+Optional orchestration UI: `docker compose up -d kestra-postgres kestra` → `http://localhost:8085` (`admin@kestra.io` / `Admin1234!`).
 
 | Service | Port | Notes |
 |---------|------|--------|
@@ -271,7 +271,7 @@ https://policy-refund-agent.onrender.com
 ### Hybrid retrieval (secondary — Streamlit)
 
 \* *Secondary Streamlit prototype (dev/demo)* — not the official Product UI.  
-Streamlit: [Cloud](https://policy-refund-agent.streamlit.app/) · [Local `:8502`](http://localhost:8502)
+Live: [Streamlit Cloud](https://policy-refund-agent.streamlit.app/) · local Compose serves the same UI on `:8502`
 
 Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` and per-section RRF scores.
 
@@ -280,7 +280,7 @@ Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` an
 ### Monitoring (Postgres → Grafana + feedback)
 
 Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).  
-Public Insights: https://policy-refund-agent-grafana.onrender.com/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1 · Local Ops: Grafana http://localhost:3002 · Streamlit http://localhost:8502
+[Public Insights (Grafana on Render)](https://policy-refund-agent-grafana.onrender.com/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1) · local Ops runs Grafana on `:3002` and Streamlit on `:8502`
 
 | Step | Description |
 |------|-------------|
@@ -351,7 +351,7 @@ Rows marked **capstone extra** are **implemented** features that are not fixed-s
 | **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. Harness: [`app/evaluate.py`](app/evaluate.py), cases [`data/eval_data.json`](data/eval_data.json), 3-way script [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py). Tracked smoke summary: [`data/eval_results_judge_smoke.json`](data/eval_results_judge_smoke.json) (Hit@1/3/5 **100 %**, MRR **1.0**, n=3). Full local runs write `data/eval_results.json` (gitignored — regenerate with `uv run --no-sync python -m app.evaluate --retrieval-only`) |
 | **LLM evaluation** | 2 | Compared **two system prompts** on the same retrieval context: **A** minimal grounded vs **B** production `SUPPORT_SYSTEM_PROMPT` (structured + safety). Judge means **A≈4.73** / **B=5.00** (n=5) → **selected B**. Tracked evidence: [`data/eval_llm_approaches.json`](data/eval_llm_approaches.json), script [`scripts/eval_llm_approaches.py`](scripts/eval_llm_approaches.py). Same-model judge (Gemma) = relative signal, not absolute truth |
 | **Interface** | 2 | Official: Render Product chat + hub — https://policy-refund-agent.onrender.com ([Screenshots → Official Product](#official-product-render)). Secondary / local: Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` |
-| **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
+| **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → `http://localhost:8085` |
 | **Monitoring** | 2 | Postgres / Neon `conversation_logs` + feedback + Grafana **7 panels** — Insights on Render; local Ops `:3002` — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json) — [Screenshots](#screenshots) |
 | **Containerization** | 2 | `docker compose up -d postgres grafana streamlit` — [`Dockerfile`](Dockerfile), [`docker-compose.yaml`](docker-compose.yaml); Render Blueprint [`render.yaml`](render.yaml) |
 | **Reproducibility** | 2 | [Quick start](#quick-start), [Configuration](#configuration), `.env.example`, `requirements.txt` / `pyproject.toml` (Python ≥ 3.12), policy + eval data in `data/` |
@@ -468,7 +468,7 @@ PRA_PG_DB=neondb
 PRA_PG_SSLMODE=require
 ```
 
-Then: `docker compose up -d grafana` and open http://localhost:3002 (admin/admin). Re-take monitoring screenshots if panels update from public traffic.
+Then: `docker compose up -d grafana` and open `http://localhost:3002` (admin/admin). Re-take monitoring screenshots if panels update from public traffic.
 
 
 [↑ Contents](#table-of-contents)
@@ -488,7 +488,7 @@ cd E:\IT_SPACES\AI\Projects\llm\policy-refund-agent
 docker compose up -d
 ```
 
-3. Confirm Postgres shows `healthy`, then open **http://localhost:3002**.
+3. Confirm Postgres shows `healthy`, then open `http://localhost:3002`.
 
 Port map: `:3000` / `:3001` belong to other project stacks. **PRA uses `:3002` only**.
 
