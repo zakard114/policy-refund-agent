@@ -350,11 +350,40 @@ docker compose up -d postgres grafana streamlit              # full stack
 ### Official: Render (Product + Insights + Integrate)
 
 Primary public face — Product UI, Integrate API (`/health` `/search` `/answer` `/docs`), and Grafana Insights.  
-Blueprint: [`render.yaml`](render.yaml). Steps: [`docs/RENDER.md`](docs/RENDER.md).
+Blueprint: [`render.yaml`](render.yaml). Full walkthrough: [`docs/RENDER.md`](docs/RENDER.md).
 
-After deploy, set GitHub **About → Homepage** to the Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
+1. Render Dashboard → **New → Blueprint** → this repo / `main`.
+2. Fill **Dashboard secrets** (`sync: false` — never commit real values). Prefills like `POSTGRES_PORT=5432` / `POSTGRES_SSLMODE=require` / Cerebras model are already in the Blueprint.
 
-**Ops hub is password-locked (not published).** Peer reviewers use Product / Insights / Integrate only. The Product corner **Ops 🔒** never exposes Kestra or local Postgres on the public internet — unlock returns local-only guidance after `PRA_OPS_PASSWORD` matches. Operators set that env in the Render Dashboard (Product service → Environment) or in local `.env` (see `.env.example`); do **not** put the password in this README or in git. Step-by-step: [`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md).
+**Product** service `policy-refund-agent` (and Integrate API `policy-refund-agent-api` if present) — Environment:
+
+```env
+CEREBRAS_API_KEY=your-cerebras-key
+POSTGRES_HOST=ep-xxxx.region.aws.neon.tech
+POSTGRES_DB=neondb
+POSTGRES_USER=neondb_owner
+POSTGRES_PASSWORD=your-neon-password
+PRA_OPS_PASSWORD=your-ops-unlock-password
+```
+
+Use the **same Neon** as below. On Product only: add `PRA_OPS_PASSWORD` via **Edit → Add** if the row is missing ([`docs/OPS_PASSWORD.md`](docs/OPS_PASSWORD.md)). Wrong service: `policy-refund-agent-api` — Ops 🔒 does not use that env.
+
+**Insights** service `policy-refund-agent-grafana` — Environment:
+
+```env
+GF_SECURITY_ADMIN_PASSWORD=your-grafana-admin-password
+PRA_PG_HOST=ep-xxxx.region.aws.neon.tech:5432
+PRA_PG_USER=neondb_owner
+PRA_PG_PASSWORD=your-neon-password
+PRA_PG_DB=neondb
+```
+
+(`PRA_PG_HOST` includes **`:5432`**. Same Neon DB as Product `POSTGRES_*`.)
+
+3. Wait until services are **Live / Healthy**. Smoke: Product `/`, API `/health` + `/docs`, Grafana dashboard.
+4. GitHub **About → Homepage** → Render Product URL. Local Grafana `:3002` and Compose Streamlit `:8502` stay **Ops / dev**.
+
+**Ops 🔒** is password-locked (not published). Peer reviewers use Product / Insights / Integrate only — unlock returns **local-only** guidance after `PRA_OPS_PASSWORD` matches. Never put that password in README or git.
 
 ### Secondary prototype: Streamlit Community Cloud
 
