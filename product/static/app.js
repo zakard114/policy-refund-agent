@@ -6,6 +6,7 @@
   const input = document.getElementById("question-input");
   const sendBtn = document.getElementById("send-btn");
   const toolsToggle = document.getElementById("use-tools");
+  const useLlmToggle = document.getElementById("use-llm");
   const chips = document.getElementById("chips");
   const clearBtn = document.getElementById("clear-chat");
   const modelSelect = document.getElementById("model-select");
@@ -267,7 +268,9 @@
     const bubble = document.createElement("div");
     bubble.className = "bubble typing";
     const label = document.createElement("span");
-    const phases = toolsToggle.checked
+    const phases = useLlmToggle && !useLlmToggle.checked
+      ? ["Searching policy…", "Ranking citations…"]
+      : toolsToggle.checked
       ? [
           "Checking order tools & policy…",
           "Running agent tools…",
@@ -402,7 +405,12 @@
       hint.textContent = bits.join(" · ");
       wrap.appendChild(hint);
     }
-    addFeedback(wrap, data.log_id);
+    if (data.use_llm !== false) addFeedback(wrap, data.log_id);
+  }
+
+  function syncLlmMode() {
+    if (!toolsToggle || !useLlmToggle) return;
+    toolsToggle.disabled = !useLlmToggle.checked;
   }
 
   function setBusy(busy) {
@@ -413,7 +421,8 @@
         : "Ask about refunds, returns, or order ZK-1001...";
     }
     if (sendBtn) sendBtn.disabled = busy;
-    if (toolsToggle) toolsToggle.disabled = busy;
+    if (toolsToggle) toolsToggle.disabled = busy || !!(useLlmToggle && !useLlmToggle.checked);
+    if (useLlmToggle) useLlmToggle.disabled = busy;
     if (modelSelect) modelSelect.disabled = busy;
     if (retrievalSelect) retrievalSelect.disabled = busy;
     if (chips) {
@@ -439,8 +448,10 @@
       body: JSON.stringify({
         query: q,
         num_results: 3,
-        use_llm: true,
-        use_tools: !!(toolsToggle && toolsToggle.checked),
+        use_llm: !useLlmToggle || useLlmToggle.checked,
+        use_tools:
+          (!useLlmToggle || useLlmToggle.checked) &&
+          !!(toolsToggle && toolsToggle.checked),
         method: retrievalSelect ? retrievalSelect.value : "hybrid",
         model: modelSelect ? modelSelect.value : undefined,
       }),
@@ -474,6 +485,11 @@
       e.preventDefault();
       ask(input ? input.value : "");
     });
+  }
+
+  if (useLlmToggle) {
+    useLlmToggle.addEventListener("change", syncLlmMode);
+    syncLlmMode();
   }
 
   if (chips) {

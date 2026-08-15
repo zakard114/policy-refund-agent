@@ -221,6 +221,8 @@ def ops_unlock(request: OpsUnlockRequest) -> dict[str, Any]:
     provided = request.password.strip()
     if not hmac.compare_digest(provided, expected):
         raise HTTPException(status_code=401, detail="Invalid Ops password")
+    # Always return fixed local guidance — never echo deployed POSTGRES_HOST
+    # (e.g. Neon) even if the shared Ops password is known.
     return {
         "ok": True,
         "note": (
@@ -228,12 +230,9 @@ def ops_unlock(request: OpsUnlockRequest) -> dict[str, Any]:
             "running docker compose (not rendered as public links)."
         ),
         "local": {
-            "grafana_ops": os.getenv("GRAFANA_URL", "http://localhost:3002"),
-            "postgres": (
-                f"{os.getenv('POSTGRES_HOST', 'localhost')}:"
-                f"{os.getenv('POSTGRES_PORT', '5435')}"
-            ),
-            "kestra": os.getenv("KESTRA_URL", "http://localhost:8085"),
+            "grafana_ops": "http://localhost:3002",
+            "postgres": "localhost:5435",
+            "kestra": "http://localhost:8085",
             "compose": "docker compose up -d postgres grafana",
         },
         "insights_admin": (

@@ -8,7 +8,7 @@ Built as a capstone project for [LLM Zoomcamp](https://github.com/DataTalksClub/
 
 **Official Product (Render):** https://policy-refund-agent.onrender.com  
 **Integrate API:** https://policy-refund-agent-api.onrender.com/docs · also `/docs` on Product  
-**Insights (Grafana):** https://policy-refund-agent-grafana.onrender.com  
+**Insights (Grafana):** https://policy-refund-agent-grafana.onrender.com/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1<br>
 **Secondary prototype (Streamlit Cloud — may sleep):** https://policy-refund-agent.streamlit.app/  
 Try chips: ZK-1001 · Non-refundable · 한국어 · or ask freely (Agent tools on).
 
@@ -54,6 +54,7 @@ Support teams need answers **strictly from policy documents** and consistent ref
 3. Returns safe fallbacks when context is insufficient or prompt injection is detected
 4. Evaluates refund eligibility with mock order tools (`lookup_order` / `evaluate_refund`)
 5. Measures quality offline (Hit Rate, MRR, LLM-as-judge), including multilingual questions (Korean / Spanish / French) with English glosses in [`data/eval_data.json`](data/eval_data.json)
+6. Offers a retrieval-only Product/API mode that returns ranked policy citations without an LLM call
 
 ### Knowledge base
 
@@ -163,7 +164,7 @@ If `pra-streamlit` is missing after a fresh clone: `uv pip install -e . --no-dep
 
 ### Agent tools
 
-Streamlit sidebar toggle **Agent tools** (default on).
+Product and Streamlit toggle **Agent tools** (default on). Product also exposes **Generate answer**: turn it off for retrieval-only citations with no LLM call. The API equivalent is `POST /answer` with `"use_llm": false`.
 Demo orders: `ZK-1001` (eligible), `ZK-1002` (ineligible), `ZK-1003` (need_more_info).
 
 ```powershell
@@ -191,7 +192,9 @@ Technical graph (same system, code-oriented):
 ```mermaid
 flowchart TD
     User["User"]
-    ST["Streamlit UI<br/>:8502 / Cloud"]
+    Product["Render Product<br/>static chat + hub"]
+    API["FastAPI<br/>Product + Integrate API"]
+    ST["Streamlit<br/>secondary / local"]
     Agent["Agent path<br/>app/agent.py"]
     RAG["RAG path<br/>app/llm.py"]
     Tools["Tools<br/>lookup_order · evaluate_refund · search_policy"]
@@ -205,7 +208,11 @@ flowchart TD
     GF["Grafana<br/>:3002"]
     Kestra["Kestra<br/>ingest flow :8085"]
 
-    User --> ST
+    User --> Product
+    Product --> API
+    User -. secondary .-> ST
+    API --> Agent
+    API --> RAG
     ST --> Agent
     ST --> RAG
     Agent --> Tools
@@ -218,7 +225,9 @@ flowchart TD
     Agent --> LLM
     RAG --> LLM
     LLM --> Safety
+    Safety --> API
     Safety --> ST
+    API --> PG
     ST --> PG
     PG --> GF
     Kestra --> Policy
@@ -226,6 +235,8 @@ flowchart TD
     linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
     style User fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
+    style Product fill:#0f766e,color:#e2e8f0,stroke:#5eead4
+    style API fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
     style ST fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
     style Agent fill:#151c24,color:#e2e8f0,stroke:#64748b
     style RAG fill:#1a2430,color:#e2e8f0,stroke:#64748b
@@ -241,7 +252,7 @@ flowchart TD
     style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
 ```
 
-**Request path (short):** question → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → Streamlit → log row (+ optional 👍/👎) → Grafana.
+**Request path (short):** question → Render Product / FastAPI → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → response + log row (+ optional 👍/👎) → Grafana. Streamlit remains a secondary client of the same core.
 
 
 [↑ Contents](#table-of-contents)
@@ -302,7 +313,7 @@ Hybrid RAG chat (keyword + vector **RRF**). Caption shows `retrieval: hybrid` an
 ### Monitoring (Postgres → Grafana + feedback)
 
 Empty dashboard → live ask with 👍 → metrics update (`conversation_logs`).  
-Public Insights: https://policy-refund-agent-grafana.onrender.com · Local Ops: Grafana http://localhost:3002 · Streamlit http://localhost:8502
+Public Insights: https://policy-refund-agent-grafana.onrender.com/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1 · Local Ops: Grafana http://localhost:3002 · Streamlit http://localhost:8502
 
 | Step | Description |
 |------|-------------|
@@ -370,8 +381,8 @@ Rows marked **capstone extra** are **implemented** features that are not fixed-s
 |-----------|--------|------------------------|
 | **Problem description** | 2 | [Problem](#problem) — Zakard Shop refund support; synthetic KB in [`data/refund_policy.md`](data/refund_policy.md) |
 | **Retrieval flow** | 2 | KB + LLM: [`app/hybrid.py`](app/hybrid.py) (keyword + vector **RRF**) → [`app/llm.py`](app/llm.py) `answer_question` with citations |
-| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. [`app/evaluate.py`](app/evaluate.py), [`data/eval_data.json`](data/eval_data.json), results [`data/eval_results.json`](data/eval_results.json) — Hit@1/3/5 **100 %**, MRR **1.0** (20 answerable). Scripts: [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py) |
-| **LLM evaluation** | 2 | Compared **two system prompts** on the same retrieval context: **A** minimal grounded vs **B** production `SUPPORT_SYSTEM_PROMPT` (structured + safety). Judge means **A=4.73** / **B=5.00** (n=5) → **selected B**. Evidence: [`data/eval_llm_approaches.json`](data/eval_llm_approaches.json), script [`scripts/eval_llm_approaches.py`](scripts/eval_llm_approaches.py). Full 26-case judge also in [`data/eval_results.json`](data/eval_results.json) (Fact Pass **100 %**, mean **4.97/5.00**) |
+| **Retrieval evaluation** | 2 | Multiple strategies compared (`keyword` / `vector` / `hybrid`); **hybrid** selected. Harness: [`app/evaluate.py`](app/evaluate.py), cases [`data/eval_data.json`](data/eval_data.json), 3-way script [`scripts/m2_4_eval_3way.py`](scripts/m2_4_eval_3way.py). Tracked smoke summary: [`data/eval_results_judge_smoke.json`](data/eval_results_judge_smoke.json) (Hit@1/3/5 **100 %**, MRR **1.0**, n=3). Full local runs write `data/eval_results.json` (gitignored — regenerate with `uv run --no-sync python -m app.evaluate --retrieval-only`) |
+| **LLM evaluation** | 2 | Compared **two system prompts** on the same retrieval context: **A** minimal grounded vs **B** production `SUPPORT_SYSTEM_PROMPT` (structured + safety). Judge means **A≈4.73** / **B=5.00** (n=5) → **selected B**. Tracked evidence: [`data/eval_llm_approaches.json`](data/eval_llm_approaches.json), script [`scripts/eval_llm_approaches.py`](scripts/eval_llm_approaches.py). Same-model judge (Gemma) = relative signal, not absolute truth |
 | **Interface** | 2 | Official: Render Product chat + hub — https://policy-refund-agent.onrender.com ([Screenshots → Official Product](#official-product-render)). Secondary / local: Streamlit chat + citations + 👍/👎 — [`app/streamlit_ui.py`](app/streamlit_ui.py), `pra-streamlit`, Compose `:8502` |
 | **Ingestion pipeline** | 2 | Kestra flow [`flows/ingest_policy.yaml`](flows/ingest_policy.yaml) — `docker compose up -d kestra-postgres kestra` → http://localhost:8085 |
 | **Monitoring** | 2 | Postgres / Neon `conversation_logs` + feedback + Grafana **7 panels** — Insights on Render; local Ops `:3002` — [`app/database.py`](app/database.py), [`grafana/dashboards/pra_agent_monitoring.json`](grafana/dashboards/pra_agent_monitoring.json) — [Screenshots](#screenshots) |

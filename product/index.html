@@ -166,6 +166,18 @@
               </span>
             </span>
           </label>
+          <label class="rail-toggle">
+            <input type="checkbox" id="use-llm" checked>
+            <span class="rail-toggle-text">
+              Generate answer
+              <span class="tip-wrap">
+                <span class="tip" tabindex="0" aria-describedby="llm-answer-tip" onclick="event.preventDefault(); event.stopPropagation();">?</span>
+                <span class="tip-bubble" id="llm-answer-tip" role="tooltip">
+                  Off: retrieval-only mode returns ranked policy citations without an LLM call.
+                </span>
+              </span>
+            </span>
+          </label>
           <p class="rail-help">Whitelist models only. Demo orders: ZK-1001…</p>
         </aside>
 
@@ -285,6 +297,6 @@
     </div>
   </div>
 
-<script src="/static/app.js?v=14"></script>
+<script src="/static/app.js?v=15"></script>
 </body>
 </html>

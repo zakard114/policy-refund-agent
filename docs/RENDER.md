@@ -81,11 +81,12 @@ Ops stays locked off the public face: set `PRA_OPS_PASSWORD` in the Dashboard fo
 
 | Service | URL path |
 |---------|----------|
-| Product | `https://<product>.onrender.com/` and `/_stcore/health` |
+| Product | `https://<product>.onrender.com/` and `/health` (FastAPI Product + static UI) |
 | API | `https://<api>.onrender.com/health` and `/docs` |
-| Grafana | `https://<grafana>.onrender.com/` → login → PRA dashboard |
+| Grafana | `https://<grafana>.onrender.com/d/pra-agent-monitoring/pra-agent-monitoring?orgId=1` (anonymous Viewer) |
 
-Try on Product: `Can I refund order ZK-1001?` (Agent tools on).
+Try on Product: `Can I refund order ZK-1001?` (Agent tools on).  
+Optional: Settings → turn **Generate answer** off for retrieval-only citations (`POST /answer` with `"use_llm": false`).
 
 ### 6) After it works
 

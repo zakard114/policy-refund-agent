@@ -296,14 +296,14 @@
       "type": "stat"
     }
   ],
-  "refresh": "5s",
+  "refresh": "30s",
   "schemaVersion": 39,
   "tags": ["pra", "module-5", "monitoring"],
   "templating": { "list": [] },
-  "time": { "from": "now-3h", "to": "now" },
+  "time": { "from": "now-30d", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
   "title": "PRA Agent Monitoring",
   "uid": "pra-agent-monitoring",
-  "version": 5
+  "version": 6
 }
