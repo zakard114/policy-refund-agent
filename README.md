@@ -191,65 +191,32 @@ Technical graph (same system, code-oriented):
 
 ```mermaid
 flowchart TD
-    User["User"]
-    Product["Render Product<br/>static chat + hub"]
-    API["FastAPI<br/>Product + Integrate API"]
-    ST["Streamlit<br/>secondary / local"]
-    Agent["Agent path<br/>app/agent.py"]
-    RAG["RAG path<br/>app/llm.py"]
-    Tools["Tools<br/>lookup_order · evaluate_refund · search_policy"]
-    Hybrid["Hybrid RRF<br/>app/hybrid.py"]
-    KW["Keyword<br/>minsearch"]
-    Vec["Vector ranks<br/>TF-IDF / pgvector"]
-    Policy["Policy KB<br/>data/refund_policy.md"]
-    LLM["LLM<br/>Cerebras Gemma"]
-    Safety["Safety guards<br/>app/safety.py"]
-    PG[("Postgres / Neon<br/>conversation_logs")]
-    GF["Grafana<br/>:3002"]
-    Kestra["Kestra<br/>ingest flow :8085"]
-
-    User --> Product
-    Product --> API
-    User -. secondary .-> ST
-    API --> Agent
-    API --> RAG
-    ST --> Agent
-    ST --> RAG
-    Agent --> Tools
-    Tools --> Hybrid
-    RAG --> Hybrid
-    Hybrid --> KW
-    Hybrid --> Vec
-    KW --> Policy
-    Vec --> Policy
-    Agent --> LLM
-    RAG --> LLM
-    LLM --> Safety
-    Safety --> API
-    Safety --> ST
-    API --> PG
-    ST --> PG
-    PG --> GF
-    Kestra --> Policy
+    User["User"] --> Product["Render Product<br/>FastAPI + static chat · /docs"]
+    Product --> Core["Agent + RAG core<br/>app/agent.py · app/llm.py"]
+    ST["Streamlit<br/>secondary / local"] -.-> Core
+    Core --> Tools["Order tools<br/>lookup_order · evaluate_refund"]
+    Core --> Hybrid["Hybrid RRF<br/>minsearch + vector ranks"]
+    Core --> LLM["LLM<br/>Cerebras Gemma"]
+    Hybrid --> Policy["Policy KB<br/>data/refund_policy.md"]
+    Kestra["Kestra ingest"] --> Policy
+    LLM --> Safety["Safety guards<br/>app/safety.py"]
+    Safety --> PG[("Neon / Postgres<br/>conversation_logs")]
+    PG --> GF["Grafana Insights"]
 
     linkStyle default stroke:#5ecfc4,stroke-width:1.5px
 
     style User fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
     style Product fill:#0f766e,color:#e2e8f0,stroke:#5eead4
-    style API fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
-    style ST fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
-    style Agent fill:#151c24,color:#e2e8f0,stroke:#64748b
-    style RAG fill:#1a2430,color:#e2e8f0,stroke:#64748b
+    style Core fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style ST fill:#151c24,color:#e2e8f0,stroke:#64748b
     style Tools fill:#151c24,color:#e2e8f0,stroke:#5ecfc4
     style Hybrid fill:#0f766e,color:#e2e8f0,stroke:#5eead4
-    style KW fill:#1a2430,color:#e2e8f0,stroke:#64748b
-    style Vec fill:#151c24,color:#e2e8f0,stroke:#64748b
     style Policy fill:#1a2430,color:#e2e8f0,stroke:#5ecfc4
+    style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
     style LLM fill:#b45309,color:#e2e8f0,stroke:#fbbf24
     style Safety fill:#334155,color:#e2e8f0,stroke:#94a3b8
     style PG fill:#1e3a5f,color:#e2e8f0,stroke:#60a5fa
     style GF fill:#c2410c,color:#e2e8f0,stroke:#fb923c
-    style Kestra fill:#151c24,color:#e2e8f0,stroke:#64748b
 ```
 
 **Request path (short):** question → Render Product / FastAPI → (optional tools) → hybrid RRF retrieval → LLM with citations → safety check → response + log row (+ optional 👍/👎) → Grafana. Streamlit remains a secondary client of the same core.
